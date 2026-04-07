@@ -1,3 +1,4 @@
+// app/api/webhook/route.ts
 import axios from "axios";
 import { connectDB } from "@/app/lib/mongodb";
 import { AutomationRule } from "@/app/models/AutomationRule";
@@ -7,7 +8,6 @@ const VERIFY_TOKEN = "triggerflow123";
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN!;
 const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN!;
 
-// GET - webhook verification
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const mode = searchParams.get("hub.mode");
@@ -20,7 +20,6 @@ export async function GET(req: Request) {
   return new Response("Verification failed", { status: 403 });
 }
 
-// POST - receive and process webhook events
 export async function POST(req: Request) {
   const body = await req.json();
   console.log("Webhook received:", JSON.stringify(body, null, 2));
@@ -41,54 +40,55 @@ export async function POST(req: Request) {
       const commenterId = comment.from?.id;
       const commentId = comment.id;
 
-      console.log("Comment detected:", { mediaId, commentText, commenterId });
-
       if (!mediaId || !commentText || !commenterId || !commentId) continue;
 
-      // Step 1 - find active rule for this reel in MongoDB
+      // Step 1 - find active rule
       const rule = await AutomationRule.findOne({ mediaId, isActive: true });
-      if (!rule) {
-        console.log("No active rule found for media:", mediaId);
-        continue;
-      }
+      if (!rule) continue;
 
-      // Step 2 - check if comment contains the trigger keyword
-      if (!commentText.includes(rule.keyword.toLowerCase())) {
-        console.log("Keyword not matched. Expected:", rule.keyword);
-        continue;
-      }
+      // Step 2 - keyword check
+      if (!commentText.includes(rule.keyword.toLowerCase())) continue;
 
-      // Step 3 - deduplication check using ProcessedComment
+      // Step 3 - dedup check
       const dedupKey = `${commenterId}:${mediaId}`;
       const already = await ProcessedComment.findOne({ dedupKey });
-      if (already) {
-        console.log("Already replied to this user on this reel, skipping");
-        continue;
-      }
+      if (already) continue;
 
-      // Step 4 - send public comment reply (always works)
+      // Step 4 - send comment reply
       const commentSuccess = await replyToComment(commentId, rule.replyToComment);
 
-      // Step 5 - attempt Instagram DM (works once Meta approves you)
+      // Step 5 - send DM
       const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
 
-      // Step 6 - save to ProcessedComment if either succeeded
-      if (commentSuccess || dmSuccess) {
+      // Step 6 - save dedup + update stats ✅ ONLY place stats are updated
+      try {
         await ProcessedComment.create({ dedupKey, ruleId: rule._id });
-        console.log(`   Comment reply: ${commentSuccess ? "OK" : "FAILED"}`);
-        console.log(`   Instagram DM:  ${dmSuccess ? "OK" : "FAILED (needs approval)"}`);
+      } catch (err: any) {
+        if (err.code === 11000) {
+          console.log("Duplicate dedupKey, skipping stats update");
+          continue; // ← prevents stats update if dedup already exists
+        }
+        throw err;
       }
+
+      await AutomationRule.findByIdAndUpdate(rule._id, {
+        $inc: {
+          triggers: 1,
+          repliesSent: commentSuccess || dmSuccess ? 1 : 0,
+        },
+        $set: { lastTriggeredAt: new Date() },
+      });
+
+      console.log(`Comment reply: ${commentSuccess ? "OK" : "FAILED"}`);
+      console.log(`Instagram DM:  ${dmSuccess ? "OK" : "FAILED (needs approval)"}`);
     }
   }
 
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
 
-// Comment reply - works immediately, no approval needed
-async function replyToComment(
-  commentId: string,
-  message: string
-): Promise<boolean> {
+// ✅ Clean - no DB calls here
+async function replyToComment(commentId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
       `https://graph.facebook.com/v19.0/${commentId}/replies`,
@@ -103,11 +103,8 @@ async function replyToComment(
   }
 }
 
-// Instagram DM - requires Meta approval, fails silently until then
-async function sendInstagramDM(
-  userId: string,
-  message: string
-): Promise<boolean> {
+// ✅ Clean - no DB calls here
+async function sendInstagramDM(userId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
       "https://graph.instagram.com/v21.0/me/messages",

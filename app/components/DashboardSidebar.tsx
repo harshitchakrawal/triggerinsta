@@ -17,11 +17,10 @@ const SidebarItem = ({
 }) => (
   <Link
     href={href}
-    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${
-      active
+    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${active
         ? "bg-[#f05a28]/10 text-[#f05a28] font-semibold"
         : "text-[#5c5c5c] hover:text-[#1a1a1a] hover:bg-black/[0.04]"
-    }`}
+      }`}
   >
     {active && (
       <div className="absolute left-[-24px] w-1.5 h-5 bg-[#f05a28] rounded-r-full" style={{ boxShadow: "0 0 12px rgba(240,90,40,0.4)" }} />

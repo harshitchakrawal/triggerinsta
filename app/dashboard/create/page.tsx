@@ -102,7 +102,7 @@ export default function CreateAutomation() {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
+    <section className="relative min-h-screen overflow-hidden py-10">
       {/* 1. Base Gradient */}
       <div className="pointer-events-none absolute inset-0 bg-[#f8f9fb]" style={{
         background: "linear-gradient(135deg, #f8f9fb 0%, #ffffff 100%)"
@@ -116,7 +116,7 @@ export default function CreateAutomation() {
         background: "radial-gradient(ellipse 70% 60% at 50% 20%, rgba(255,255,255,0.8) 0%, transparent 100%)"
       }} />
 
-      <div className="relative z-10 mx-auto w-full max-w-4xl pt-8">
+      <div className="relative z-10 w-full pt-8 px-4 sm:px-6 lg:px-8">
         {/* Navigation */}
         <Link
           href="/dashboard"
@@ -143,8 +143,8 @@ export default function CreateAutomation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white/80 border border-black/[0.07] rounded-2xl p-6 backdrop-blur-md shadow-sm space-y-3">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              <div className="bg-white/80 border border-black/[0.2] rounded-xl p-6 backdrop-blur-md shadow-sm space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[#707070]">Reel URL</label>
                 <input
                   className="w-full bg-transparent border-b border-black/[0.05] pb-2 text-sm font-bold text-[#1a1a1a] focus:outline-none focus:border-[#f05a28] transition-all placeholder:text-[#ccc]"
@@ -154,7 +154,7 @@ export default function CreateAutomation() {
                 />
               </div>
 
-              <div className="bg-white/80 border border-black/[0.07] rounded-2xl p-6 backdrop-blur-md shadow-sm space-y-3 opacity-90 transition-opacity">
+              <div className="bg-white/80 border border-black rounded-xl p-6 backdrop-blur-md shadow-sm space-y-3 opacity-90 transition-opacity">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[#707070]">Media ID</label>
                 <div className="text-sm font-black text-[#1a1a1a]/40 italic truncate">
                   {mediaId || "Auto-extracted from URL"}
@@ -174,7 +174,7 @@ export default function CreateAutomation() {
               </p>
             </div>
 
-            <div className="bg-white/80 border border-black/[0.07] rounded-3xl p-8 backdrop-blur-md shadow-sm max-w-2xl">
+            <div className="bg-white/80 border border-black/[0.15] rounded-xl p-8 backdrop-blur-md shadow-sm">
               <label className="text-[10px] font-black uppercase tracking-widest text-[#707070] mb-4 block">Keywords</label>
               <div className="flex flex-wrap gap-2 items-center">
                 {keywords.map((kw) => (
@@ -212,8 +212,8 @@ export default function CreateAutomation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white/80 border border-black/[0.07] rounded-3xl p-8 backdrop-blur-md shadow-sm space-y-4">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              <div className="bg-white/80 border border-black/[0.2] rounded-xl p-6 backdrop-blur-md shadow-sm ">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[#707070]">Comment reply</label>
                   <span className="text-[9px] font-black text-[#f05a28] px-2 py-1 rounded-full bg-[#f05a28]/10 border border-[#f05a28]/20 uppercase tracking-widest">
@@ -221,7 +221,7 @@ export default function CreateAutomation() {
                   </span>
                 </div>
                 <textarea
-                  className="w-full bg-black/[0.02] border border-black/[0.05] rounded-xl px-4 py-3 text-sm font-bold text-[#1a1a1a] focus:outline-none focus:border-[#f05a28]/40 transition-all resize-none min-h-[100px]"
+                  className="w-full bg-black/[0.02] border border-black/[0.05] rounded-xl px-4 py-3 text-sm font-bold text-[#1a1a1a] focus:outline-none focus:border-[#f05a28]/40 transition-all resize-none "
                   value={replyToComment}
                   onChange={(e) => setreplyToComment(e.target.value.slice(0, 200))}
                   placeholder="Enter your comment reply..."
@@ -231,7 +231,7 @@ export default function CreateAutomation() {
                 </div>
               </div>
 
-              <div className="bg-white/80 border border-black/[0.07] rounded-3xl p-8 backdrop-blur-md shadow-sm space-y-4">
+              <div className="bg-white/80 border border-black rounded-xl p-6 backdrop-blur-md shadow-sm space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-black uppercase tracking-widest text-[#707070]">DM message</label>
                   <span className="text-[9px] font-black text-[#707070] px-2 py-1 rounded-full bg-black/[0.05] border border-black/[0.05] uppercase tracking-widest font-mono">
@@ -239,7 +239,7 @@ export default function CreateAutomation() {
                   </span>
                 </div>
                 <textarea
-                  className="w-full bg-black/[0.02] border border-black/[0.05] rounded-xl px-4 py-3 text-sm font-bold text-[#1a1a1a] focus:outline-none focus:border-[#f05a28]/40 transition-all resize-none min-h-[100px]"
+                  className="w-full bg-black/[0.02] border border-black/[0.05] rounded-xl px-4 py-3 text-sm font-bold text-[#1a1a1a] focus:outline-none focus:border-[#f05a28]/40 transition-all resize-none"
                   value={replyToDm}
                   onChange={(e) => setreplyToDm(e.target.value)}
                   placeholder="Enter your DM message..."
@@ -249,7 +249,7 @@ export default function CreateAutomation() {
           </section>
 
           {/* Action Footer */}
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-black/[0.05]">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-black/[0.15] max-w-4xl mx-auto">
             <div className="flex items-center gap-3 text-[#707070]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#f05a28] animate-pulse" />
               <p className="text-[11px] font-bold tracking-tight">Active immediately after saving.</p>

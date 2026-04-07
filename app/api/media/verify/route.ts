@@ -81,9 +81,7 @@ export async function POST(request: NextRequest) {
     // Step 2 — Fetch media
     const mediaList = await fetchAllMedia(accountId, accessToken);
 
-    // Step 3 — Match shortcode
-    console.log("Total media found:", mediaList.length);
-    console.log("Shortcodes:", mediaList.map(m => m.shortcode));
+    // Step 3 — Match shortcode(Check wether url metioned belongs to insta id or not)
     const match = mediaList.find((item) => item.shortcode === shortcode);
 
     // Step 4 — Return result
