@@ -143,7 +143,7 @@ export default function CreateAutomation() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl">
               <div className="bg-white/80 border border-black/[0.2] rounded-xl p-6 backdrop-blur-md shadow-sm space-y-3">
                 <label className="text-[10px] font-black uppercase tracking-widest text-[#707070]">Reel URL</label>
                 <input

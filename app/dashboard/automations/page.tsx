@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -38,7 +38,6 @@ function Toggle({ active, onToggle }: { active: boolean; onToggle: () => void })
   return (
     <button
       onClick={onToggle}
-      aria-label="Toggle automation"
       className={`relative w-11 h-6 rounded-full border-none cursor-pointer transition-colors duration-200 flex-shrink-0 ${active ? "bg-[#f05a28]" : "bg-gray-200"}`}
     >
       <span className={`absolute top-[3px] w-[18px] h-[18px] rounded-full bg-white shadow transition-all duration-200 ${active ? "left-[23px]" : "left-[3px]"}`} />
@@ -48,17 +47,17 @@ function Toggle({ active, onToggle }: { active: boolean; onToggle: () => void })
 
 function StatusBadge({ active }: { active: boolean }) {
   return (
-    <span className={`text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full ${active ? "bg-[#f05a28]/10 text-[#f05a28]" : "bg-black/[0.05] text-[#707070]"}`}>
+    <span className={`text-[10px] font-black uppercase tracking-wide px-2.5 py-1 rounded-full ${active ? "bg-[#f05a28]/10 text-[#f05a28]" : "bg-black/[0.05] text-navy"}`}>
       {active ? "Active" : "Paused"}
     </span>
   );
 }
 
-function Stat({ label, value, valueColor = "text-[#0d0d0d]" }: { label: string; value: string; valueColor?: string }) {
+function Stat({ label, value, valueColor = "text-navy" }: { label: string; value: string; valueColor?: string }) {
   return (
     <div>
       <div className={`text-base font-black leading-none ${valueColor}`}>{value}</div>
-      <div className="text-[10px] font-bold text-[#707070] mt-0.5 uppercase tracking-wide">{label}</div>
+      <div className="text-[10px] font-bold text-navy mt-0.5 uppercase tracking-wide">{label}</div>
     </div>
   );
 }
@@ -67,10 +66,10 @@ function ActionBtn({ label, onClick, danger = false }: { label: string; onClick:
   return (
     <button
       onClick={onClick}
-      className={`text-xs font-bold px-4 py-2 rounded-lg border transition-all duration-150 cursor-pointer
+      className={`text-sm font-bold px-4 py-2 rounded-lg border transition-all duration-150 cursor-pointer
         ${danger
-          ? "border-black/[0.07] text-red-600 hover:border-red-300 hover:bg-red-50"
-          : "border-black/[0.07] text-[#707070] hover:border-black/[0.15] hover:text-[#1a1a1a] hover:bg-black/[0.02]"
+          ? "border-black text-red-600 hover:border-red-300 hover:bg-red-50"
+          : "border-black text-[#1a1a1a] hover:border-black/[0.15] hover:text-gray-400 hover:bg-black/[0.02]"
         }`}
     >
       {label}
@@ -118,7 +117,7 @@ function AutomationCard({
               <Toggle active={automation.isActive} onToggle={() => onToggle(automation._id)} />
             </div>
           </div>
-          <p className="m-0 text-xs text-[#707070] font-medium">
+          <p className="m-0 text-xs text-navy font-medium">
             {automation.mediaId} · Added {addedDate}
           </p>
 
@@ -144,7 +143,7 @@ function AutomationCard({
           <Stat
             label="Success"
             value={automation.triggers > 0 ? `${successRate}%` : "—"}
-            valueColor={successRate === 100 ? "text-green-600" : successRate >= 85 ? "text-amber-600" : successRate > 0 ? "text-red-500" : "text-[#0d0d0d]"}
+            valueColor={successRate === 100 ? "text-green-600" : successRate >= 85 ? "text-amber-600" : successRate > 0 ? "text-red-500" : "text-navy"}
           />
           <Stat label="Last trigger" value={lastTrigger} />
         </div>
@@ -166,7 +165,7 @@ function EmptyState({ filter }: { filter: string }) {
       <p className="m-0 text-sm font-bold text-[#1a1a1a]">
         {filter === "All" ? "No automations yet" : `No ${filter.toLowerCase()} automations`}
       </p>
-      <p className="m-0 text-xs text-[#707070] font-medium">Create your first automation to get started</p>
+      <p className="m-0 text-xs text-navy font-medium">Create your first automation to get started</p>
       <Link
         href="/dashboard/create"
         className="mt-2 text-white font-black text-xs px-5 py-2.5 rounded-full hover:-translate-y-0.5 transition-all bg-[#f05a28] shadow-[0_4px_14px_rgba(240,90,40,0.3)]"
@@ -212,7 +211,7 @@ export default function AutomationsPage() {
   });
 
   const filterTabClass = (tab: string) =>
-    `px-4 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all duration-150 border ${filter === tab ? "bg-[#f05a28] text-white border-[#f05a28]" : "bg-white/80 text-[#707070] border-black/[0.07] hover:text-[#1a1a1a] backdrop-blur-sm"}`;
+    `px-4 py-2 rounded-lg text-xs font-medium cursor-pointer transition-all duration-150 border ${filter === tab ? "bg-[#f05a28] text-white border-[#f05a28]" : "bg-white/80 text-navy border-black/[0.07] hover:text-[#1a1a1a] backdrop-blur-sm"}`;
 
   return (
     <section className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
@@ -225,7 +224,7 @@ export default function AutomationsPage() {
         <div className="flex items-center justify-between mb-7 flex-wrap gap-3">
           <div>
             <h1 className="m-0 text-2xl font-black text-[#1a1a1a]">My automations</h1>
-            <p className="m-0 mt-1 text-xs font-bold text-[#707070] uppercase tracking-wide">
+            <p className="m-0 mt-1 text-xs font-bold text-navy uppercase tracking-wide">
               {automations.length} rule{automations.length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -244,7 +243,7 @@ export default function AutomationsPage() {
           <button className={filterTabClass("Paused")} onClick={() => setFilter("Paused")}>Paused</button>
 
           <div className="flex items-center gap-2 flex-1 max-w-xs ml-auto bg-white/80 border border-black/[0.07] rounded-lg px-3 backdrop-blur-sm">
-            <span className="text-[#707070] flex"><SearchIcon /></span>
+            <span className="text-navy flex"><SearchIcon /></span>
             <input
               type="text"
               placeholder="Search by reel or keyword..."
