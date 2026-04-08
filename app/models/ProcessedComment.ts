@@ -12,6 +12,16 @@ const ProcessedCommentSchema = new mongoose.Schema({
     ref: "AutomationRule", 
     required: true 
   },
+  username: {
+    type: String,
+    required: false,
+    default: "unknown_user"
+  },
+  commentText: {
+    type: String,
+    required: false,
+    default: ""
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 

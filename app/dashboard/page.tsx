@@ -1,7 +1,8 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
+import { connectDB } from "@/app/lib/mongodb";
+import { AutomationRule } from "@/app/models/AutomationRule";
+import { ProcessedComment } from "@/app/models/ProcessedComment";
 
 const StatCard = ({
   label,
@@ -78,7 +79,71 @@ const ActivityItem = ({
   </div>
 );
 
-export default function Dashboard() {
+function timeAgo(date: Date) {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + "y ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + "mo ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + "d ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + "h ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + "m ago";
+  return Math.max(0, Math.floor(seconds)) + "s ago";
+}
+
+export default async function Dashboard() {
+  await connectDB();
+  
+  const activeAutomationsCount = await AutomationRule.countDocuments({ isActive: true });
+  
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const triggersTodayCount = await ProcessedComment.countDocuments({ createdAt: { $gte: startOfToday } });
+  
+  const allRules = await AutomationRule.find({}, 'triggers repliesSent keyword reelUrl mediaId isActive sum').lean();
+  
+  let totalReplies = 0;
+  let totalTriggers = 0;
+  
+  const activeRulesSorted = [];
+  
+  for (const rule of allRules as any[]) {
+    totalReplies += (rule.repliesSent || 0);
+    totalTriggers += (rule.triggers || 0);
+    if (rule.isActive) {
+      activeRulesSorted.push(rule);
+    }
+  }
+  
+  activeRulesSorted.sort((a, b) => b.triggers - a.triggers);
+  const topActiveReels = activeRulesSorted.slice(0, 3);
+  
+  const successRate = totalTriggers > 0 ? Math.round((totalReplies / totalTriggers) * 100) : 0;
+  
+  const recentActivityRaw = await ProcessedComment.find()
+    .sort({ createdAt: -1 })
+    .limit(5)
+    .populate('ruleId', 'keyword isActive')
+    .lean();
+
+  const recentActivity = recentActivityRaw.map((a: any) => {
+    let uName = a.username;
+    if (!uName || uName === "unknown_user" || uName === "unknown") {
+      uName = a.dedupKey ? a.dedupKey.split(':')[0] : "unknown";
+    }
+
+    return {
+      user: uName,
+      action: `commented '${a.commentText || a.ruleId?.keyword || "..."}'`,
+      status: a.ruleId?.isActive ? "reply sent" : "paused rule, skipped",
+      time: timeAgo(new Date(a.createdAt)),
+      color: a.ruleId?.isActive ? "bg-[#f05a28]" : "bg-black/20"
+    };
+  });
+
   return (
     <section className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
       {/* 1. Base Gradient */}
@@ -96,7 +161,7 @@ export default function Dashboard() {
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <h1 className="text-2xl font-black text-[#1a1a1a] tracking-tight">My automations</h1>
+          <h1 className="text-2xl font-black text-[#1a1a1a] tracking-tight">Overview Dashboard</h1>
           <div className="flex items-center gap-4">
             <div className="bg-white/80 border border-black/[0.07] rounded-xl px-4 py-2 flex items-center gap-3 backdrop-blur-sm shadow-sm">
               <div className="text-right">
@@ -118,22 +183,34 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          <StatCard label="Active automations" value="3" subValue="↑ 1 this week" />
-          <StatCard label="Triggers today" value="47" subValue="↑ 12 vs yesterday" />
-          <StatCard label="Replies sent" value="41" subValue="87% success rate" />
-          <StatCard label="Total all time" value="234" subValue="Since Mar 1" subColor="text-[#707070]" />
+          <StatCard label="Active automations" value={activeAutomationsCount.toString()} subValue="Live now" />
+          <StatCard label="Triggers today" value={triggersTodayCount.toString()} subValue="Since midnight" />
+          <StatCard label="Replies sent" value={totalReplies.toString()} subValue={`${successRate}% success rate`} />
+          <StatCard label="Total all time" value={totalTriggers.toString()} subValue="All time triggers" subColor="text-[#707070]" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-black text-[#1a1a1a] uppercase tracking-widest opacity-70">Active reels</h3>
-              <button className="text-[10px] font-bold text-[#707070] hover:text-[#f05a28] transition-colors">See all →</button>
+              <Link href="/dashboard/automations" className="text-[10px] font-bold text-[#707070] hover:text-[#f05a28] transition-colors">See all →</Link>
             </div>
             <div className="space-y-3">
-              <ReelCard title="Free roadmap reel" keyword="roadmap" triggers={23} />
-              <ReelCard title="Link in bio reel" keyword="link" triggers={18} />
-              <ReelCard title="Course promo reel" keyword="join" triggers={12} status="Paused" />
+              {topActiveReels.length > 0 ? (
+                 topActiveReels.map((rule) => (
+                    <ReelCard 
+                      key={rule._id?.toString() || rule.mediaId} 
+                      title={rule.reelUrl || rule.mediaId || "Reel"} 
+                      keyword={rule.keyword} 
+                      triggers={rule.triggers || 0} 
+                      status={rule.isActive ? "Active" : "Paused"}
+                    />
+                 ))
+              ) : (
+                <div className="text-xs text-[#707070] font-medium bg-white/80 p-4 border border-black/[0.07] rounded-xl text-center">
+                  No active reels right now.
+                </div>
+              )}
             </div>
           </div>
 
@@ -143,11 +220,22 @@ export default function Dashboard() {
               <button className="text-[10px] font-bold text-[#707070] hover:text-[#f05a28] transition-colors">See all →</button>
             </div>
             <div className="flex flex-col">
-              <ActivityItem user="user123" action="commented 'roadmap'" status="reply sent" time="2m ago" />
-              <ActivityItem user="harshit_" action="commented 'link'" status="reply sent" time="8m ago" />
-              <ActivityItem user="testuser786" action="commented 'link'" status="reply sent" time="14m ago" />
-              <ActivityItem user="creator99" action="commented 'roadmap'" status="reply sent" time="31m ago" />
-              <ActivityItem user="devguy" action="commented 'join'" status="paused rule, skipped" time="1h ago" color="bg-black/20" />
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <ActivityItem 
+                    key={index} 
+                    user={activity.user} 
+                    action={activity.action} 
+                    status={activity.status} 
+                    time={activity.time} 
+                    color={activity.color} 
+                  />
+                ))
+              ) : (
+                <div className="text-xs text-[#707070] font-medium py-4 text-center">
+                  No recent activity found.
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -60,9 +60,22 @@ export async function POST(req: Request) {
       // Step 5 - send DM
       const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
 
-      // Step 6 - save dedup + update stats ✅ ONLY place stats are updated
+      // Step 6 - fetch real username and save dedup + update stats ✅ ONLY place stats are updated
+      let actualUsername = comment.from?.username || comment.from?.name || "unknown";
+      
       try {
-        await ProcessedComment.create({ dedupKey, ruleId: rule._id });
+        if (actualUsername === "unknown") {
+          // Instagram webhooks usually only send the from.id, so we must fetch the username manually
+          const res = await axios.get(`https://graph.facebook.com/v19.0/${commentId}?fields=from{username}`, {
+            params: { access_token: PAGE_ACCESS_TOKEN }
+          });
+          if (res.data?.from?.username) {
+            actualUsername = res.data.from.username;
+          } else {
+            actualUsername = commenterId; // Fallback to ID if fetch succeeds but username missing
+          }
+        }
+        await ProcessedComment.create({ dedupKey, ruleId: rule._id, username: actualUsername, commentText });
       } catch (err: any) {
         if (err.code === 11000) {
           console.log("Duplicate dedupKey, skipping stats update");
