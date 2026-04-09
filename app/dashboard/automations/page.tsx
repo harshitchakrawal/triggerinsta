@@ -96,10 +96,19 @@ function AutomationCard({
       {/* Top row */}
       <div className="flex items-start gap-3.5">
         {/* Thumbnail */}
-        <div className="w-13 h-13 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+        <div className="w-20 h-20 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
           {automation.thumbnailUrl ? (
-            <img src={automation.thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" />
-          ) : (
+            <img 
+              src={automation.thumbnailUrl}
+              alt="Thumbnail" 
+              className="w-full h-full object-cover rounded-xl"
+              onError={(e) => {
+                console.error('Image load failed:', automation.thumbnailUrl);
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          ) : null}
+          {!automation.thumbnailUrl && (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(0,212,170,0.3)" stroke="#00d4aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
