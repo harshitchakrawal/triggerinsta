@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const { mediaId, keyword, replyToComment, replyToDm } = await req.json();
+    const { mediaId, reelUrl, caption, keyword, replyToComment, replyToDm } = await req.json();
 
     if (!mediaId || !keyword || !replyToComment || !replyToDm) {
       return NextResponse.json(
@@ -17,6 +17,8 @@ export async function POST(req: Request) {
 
     const rule = await AutomationRule.create({
       mediaId,
+      reelUrl,
+      caption,
       keyword,
       replyToComment,
       replyToDM: replyToDm,
@@ -42,9 +44,16 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await connectDB();
+    const url = new URL(req.url);
+    const edit = url.searchParams.get('edit');
+    if (edit) {
+      const rule = await AutomationRule.findById(edit);
+      if (!rule) return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ rule });
+    }
     const rules = await AutomationRule.find().sort({ createdAt: -1 });
     return NextResponse.json({ rules });
   } catch (err) {
@@ -64,6 +73,26 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: true, rule });
   } catch (err) {
     console.error("[PATCH /api/rules]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    await connectDB();
+    const { id, mediaId, reelUrl, caption, keyword, replyToComment, replyToDm } = await req.json();
+    const rule = await AutomationRule.findByIdAndUpdate(id, {
+      mediaId,
+      reelUrl,
+      caption,
+      keyword,
+      replyToComment,
+      replyToDM: replyToDm
+    }, { new: true });
+    if (!rule) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ success: true, rule });
+  } catch (err) {
+    console.error("[PUT /api/rules]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -16,22 +16,21 @@ const Navbar = () => {
   return (
     <header className="absolute top-0 left-0 right-0 z-50">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
-        <div className="flex items-center justify-between h-[72px]">
+        <div className="flex items-center justify-center h-[72px] relative">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-black text-[#1a1a1a] tracking-tight">
-              Trigger<span className="text-[#f05a28]">flow</span>
-              <span className="text-[#f05a28]">.</span>
+          <Link href="/" className="absolute left-0 flex items-center gap-2 group">
+            <span className="text-xl font-black tracking-tight text-[#f0f4ff]">
+              trigger<span className="text-[#00d4aa]">flow</span>
             </span>
           </Link>
 
-          {/* Desktop Nav — pill container */}
-          <nav className="hidden md:flex items-center bg-white/70 backdrop-blur-md border border-black/[0.06] rounded-full px-2 py-1.5 gap-1 shadow-sm">
+          {/* Desktop Nav — pill container centered */}
+          <nav className="hidden md:flex items-center bg-white/[0.05] backdrop-blur-md border border-white/[0.08] rounded-full px-2 py-1.5 gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className="px-4 py-1.5 text-sm font-medium text-[#3d3d3d] hover:text-[#1a1a1a] hover:bg-black/[0.04] rounded-full transition-all"
+                className="px-4 py-1.5 text-sm font-medium text-[#f0f4ff]/50 hover:text-[#f0f4ff] hover:bg-white/[0.07] rounded-full transition-all"
               >
                 {link.label}
               </Link>
@@ -39,17 +38,11 @@ const Navbar = () => {
           </nav>
 
           {/* Desktop CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 text-sm font-medium text-[#3d3d3d] hover:text-[#1a1a1a] transition-colors"
-            >
+          <div className="absolute right-0 hidden md:flex items-center gap-3">
+            <Link href="/dashboard" className="px-4 py-2 text-sm font-medium text-[#f0f4ff]/40 hover:text-[#f0f4ff] transition-colors">
               Log In
             </Link>
-            <Link
-              href="/dashboard"
-              className="px-5 py-2.5 text-sm font-semibold text-white rounded-full bg-[#1a1a1a] hover:bg-[#333] active:scale-95 transition-all shadow-sm"
-            >
+            <Link href="/dashboard" className="px-5 py-2.5 text-sm font-black text-[#0a0e1a] rounded-full bg-[#00d4aa] shadow-[0_0_20px_rgba(0,212,170,0.3)] hover:shadow-[0_0_30px_rgba(0,212,170,0.5)] hover:-translate-y-0.5 active:scale-95 transition-all">
               Try free demo
             </Link>
           </div>
@@ -57,7 +50,7 @@ const Navbar = () => {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-full text-[#3d3d3d] hover:bg-black/5 transition-colors"
+            className="absolute right-0 md:hidden p-2 rounded-full text-white/60 hover:bg-white/10 transition-colors"
             aria-label="Toggle menu"
           >
             <div className="w-5 flex flex-col gap-1.5">
@@ -70,19 +63,15 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         <div className={`md:hidden overflow-hidden transition-all duration-300 ${mobileOpen ? "max-h-80 pb-4" : "max-h-0"}`}>
-          <div className="bg-white/80 backdrop-blur-md border border-black/[0.06] rounded-2xl p-3 flex flex-col gap-1">
+          <div className="bg-[#0a0e1a]/90 backdrop-blur-md border border-white/[0.08] rounded-2xl p-3 flex flex-col gap-1">
             {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="px-4 py-2.5 text-sm font-medium text-[#3d3d3d] hover:bg-black/[0.04] rounded-xl transition-colors"
-              >
+              <Link key={link.label} href={link.href} onClick={() => setMobileOpen(false)}
+                className="px-4 py-2.5 text-sm font-medium text-[#f0f4ff]/60 hover:bg-white/[0.05] rounded-xl transition-colors">
                 {link.label}
               </Link>
             ))}
-            <div className="mt-2 pt-2 border-t border-black/[0.06]">
-              <Link href="/dashboard" className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl bg-[#f05a28]">
+            <div className="mt-2 pt-2 border-t border-white/[0.07]">
+              <Link href="/dashboard" className="block w-full text-center px-4 py-2.5 text-sm font-black text-[#0a0e1a] rounded-xl bg-[#00d4aa]">
                 Try free demo
               </Link>
             </div>

@@ -15,26 +15,18 @@ const SidebarItem = ({
   label: string;
   active: boolean;
 }) => (
-  <Link
-    href={href}
-    className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${active
-        ? "bg-[#f05a28]/10 text-[#f05a28] font-semibold"
-        : "text-[#5c5c5c] hover:text-[#1a1a1a] hover:bg-black/[0.04]"
-      }`}
-  >
-    {active && (
-      <div className="absolute left-[-24px] w-1.5 h-5 bg-[#f05a28] rounded-r-full" style={{ boxShadow: "0 0 12px rgba(240,90,40,0.4)" }} />
-    )}
-    <span className={`transition-colors ${active ? "text-[#f05a28]" : "group-hover:text-[#1a1a1a]"}`}>
-      {icon}
-    </span>
+  <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${
+      active ? "bg-[#00d4aa]/10 text-[#00d4aa] font-semibold" : "text-[#f0f4ff]/40 hover:text-[#f0f4ff] hover:bg-white/[0.05]"
+    }`}>
+    {active && <div className="absolute left-[-24px] w-1.5 h-5 bg-[#00d4aa] rounded-r-full shadow-[0_0_12px_rgba(0,212,170,0.5)]" />}
+    <span className={`transition-colors ${active ? "text-[#00d4aa]" : "group-hover:text-[#f0f4ff]"}`}>{icon}</span>
     <span className="text-sm">{label}</span>
   </Link>
 );
 
 const SidebarSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="mb-8">
-    <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#707070] mb-4">
+    <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#f0f4ff]/20 mb-4">
       {title}
     </h3>
     <div className="flex flex-col gap-1">
@@ -139,16 +131,14 @@ const DashboardSidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-white/90 border-r border-black/[0.07] p-6 flex flex-col z-40 backdrop-blur-sm">
+    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#0a0e1a] border-r border-white/[0.07] p-6 flex flex-col z-40">
       {/* Logo */}
       <div className="mb-12 px-3">
         <Link href="/" className="flex flex-col group">
-          <span className="text-xl font-black text-[#1a1a1a] tracking-tight leading-none mb-1">
-            Triggerflow
+          <span className="text-xl font-black text-[#f0f4ff] tracking-tight leading-none mb-1">
+            trigger<span className="text-[#00d4aa]">flow</span>
           </span>
-          <span className="text-xs text-[#707070] font-medium tracking-wide">
-            Instagram automation
-          </span>
+          <span className="text-xs text-[#f0f4ff]/30 font-medium tracking-wide">Instagram automation</span>
         </Link>
       </div>
 
@@ -170,16 +160,14 @@ const DashboardSidebar = () => {
       </div>
 
       {/* User Profile */}
-      <div className="pt-6 border-t border-black/[0.07] mt-auto">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-black/[0.03] hover:bg-black/[0.06] transition-all cursor-pointer group">
-          <div className="w-10 h-10 rounded-full bg-[#f05a28]/10 flex items-center justify-center text-[#f05a28] font-bold text-sm">
+      <div className="pt-6 border-t border-white/[0.07] mt-auto">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] transition-all cursor-pointer group">
+          <div className="w-10 h-10 rounded-full bg-[#00d4aa]/15 flex items-center justify-center text-[#00d4aa] font-bold text-sm">
             HC
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-[#1a1a1a] truncate group-hover:text-[#f05a28] transition-colors">
-              triggerflow123
-            </span>
-            <span className="text-[10px] text-[#707070] font-medium">Free plan</span>
+            <span className="text-sm font-bold text-[#f0f4ff] truncate group-hover:text-[#00d4aa] transition-colors">triggerflow123</span>
+            <span className="text-[10px] text-[#f0f4ff]/30 font-medium">Free plan</span>
           </div>
         </div>
       </div>

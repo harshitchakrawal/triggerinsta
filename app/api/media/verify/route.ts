@@ -4,6 +4,7 @@ interface InstagramMedia {
   id: string;
   shortcode: string;
   permalink: string;
+  caption: string;
 }
 
 interface InstagramApiResponse {
@@ -28,7 +29,7 @@ async function fetchAllMedia(accountId: string, accessToken: string): Promise<In
   const media: InstagramMedia[] = [];
   let endpoint: string | null =
     `https://graph.facebook.com/v19.0/${accountId}/media` +
-    `?fields=id,shortcode,permalink&limit=100&access_token=${accessToken}`;
+    `?fields=id,shortcode,permalink,caption&limit=100&access_token=${accessToken}`;
 
   while (endpoint) {
     const res = await fetch(endpoint, { cache: 'no-store' });
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
       mediaId:   match.id,
       shortcode: match.shortcode,
       permalink: match.permalink,
+      caption:   match.caption || '',
     });
 
   } catch (err) {

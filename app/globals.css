@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f0ede6;
-  --foreground: #1a1a1a;
+  --bg:        #0a0e1a;
+  --bg-card:   rgba(255,255,255,0.04);
+  --border:    rgba(255,255,255,0.08);
+  --accent:    #00d4aa;
+  --accent2:   #7c6af7;
+  --text:      #f0f4ff;
+  --muted:     rgba(240,244,255,0.4);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-navy: #233142;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html, body {
   margin: 0;
@@ -25,14 +25,34 @@ html, body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* dot grid overlay */
+/* ── Grid patterns ── */
 .dot-grid {
-  background-image: radial-gradient(circle, #b0a89a 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+.cross-grid {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+/* ── Accent glow helpers ── */
+.glow-teal  { box-shadow: 0 0 30px rgba(0,212,170,0.25); }
+.glow-purple { box-shadow: 0 0 30px rgba(124,106,247,0.25); }
+
+/* ── Glass card ── */
+.glass {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
 }

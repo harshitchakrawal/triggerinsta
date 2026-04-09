@@ -11,7 +11,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#111111] flex text-white/90">
+    <div className="min-h-screen bg-[#0a0e1a] flex text-[#f0f4ff]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-72 flex-shrink-0">
         <DashboardSidebar />
@@ -27,7 +27,7 @@ export default function DashboardLayout({
 
       {/* Mobile Sidebar Content */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#161616] transform transition-transform duration-300 lg:hidden ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0a0e1a] transform transition-transform duration-300 lg:hidden ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <DashboardSidebar />
@@ -36,12 +36,10 @@ export default function DashboardLayout({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Top Header */}
-        <header className="lg:hidden h-16 bg-[#161616]/80 backdrop-blur-md border-b border-white/[0.05] flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="lg:hidden h-16 bg-[#0a0e1a]/90 backdrop-blur-md border-b border-white/[0.07] flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex flex-col">
-            <span className="text-sm font-black text-white tracking-tight">
-              Triggerflow
-            </span>
-            <span className="text-[10px] text-white/40 font-medium">Instagram automation</span>
+            <span className="text-sm font-black text-[#f0f4ff] tracking-tight">trigger<span className="text-[#00d4aa]">flow</span></span>
+            <span className="text-[10px] text-[#f0f4ff]/30 font-medium">Instagram automation</span>
           </div>
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -64,7 +62,7 @@ export default function DashboardLayout({
           </button>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto cross-grid">
           {children}
         </main>
       </div>
