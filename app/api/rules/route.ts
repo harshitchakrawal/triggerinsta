@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/app/lib/mongodb";
 import { AutomationRule } from "@/app/models/AutomationRule";
 
+async function fetchMediaDetails(mediaId: string) {
+  const accessToken = process.env.PAGE_ACCESS_TOKEN;
+  if (!accessToken) throw new Error('PAGE_ACCESS_TOKEN not set');
+
+  const res = await fetch(`https://graph.instagram.com/${mediaId}?fields=media_type,media_url,thumbnail_url,caption&access_token=${accessToken}`);
+  if (!res.ok) throw new Error('Failed to fetch media details');
+
+  const data = await res.json();
+  return data;
+}
+
 export async function POST(req: Request) {
   try {
     await connectDB();
@@ -15,10 +26,14 @@ export async function POST(req: Request) {
       );
     }
 
+    const mediaDetails = await fetchMediaDetails(mediaId);
+    const thumbnailUrl = mediaDetails.thumbnail_url || mediaDetails.media_url;
+
     const rule = await AutomationRule.create({
       mediaId,
       reelUrl,
-      caption,
+      thumbnailUrl,
+      caption: caption || mediaDetails.caption,
       keyword,
       replyToComment,
       replyToDM: replyToDm,
@@ -81,14 +96,19 @@ export async function PUT(req: Request) {
   try {
     await connectDB();
     const { id, mediaId, reelUrl, caption, keyword, replyToComment, replyToDm } = await req.json();
-    const rule = await AutomationRule.findByIdAndUpdate(id, {
-      mediaId,
+    const updateData: any = {
       reelUrl,
       caption,
       keyword,
       replyToComment,
       replyToDM: replyToDm
-    }, { new: true });
+    };
+    if (mediaId) {
+      const mediaDetails = await fetchMediaDetails(mediaId);
+      updateData.mediaId = mediaId;
+      updateData.thumbnailUrl = mediaDetails.thumbnail_url || mediaDetails.media_url;
+    }
+    const rule = await AutomationRule.findByIdAndUpdate(id, updateData, { new: true });
     if (!rule) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true, rule });
   } catch (err) {

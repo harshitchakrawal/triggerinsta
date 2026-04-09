@@ -7,6 +7,7 @@ interface Automation {
   _id: string;
   mediaId: string;
   reelUrl?: string;
+  thumbnailUrl?: string;
   caption?: string;
   keyword: string;
   replyToComment: string;
@@ -96,9 +97,13 @@ function AutomationCard({
       <div className="flex items-start gap-3.5">
         {/* Thumbnail */}
         <div className="w-13 h-13 rounded-xl bg-[#00d4aa]/10 border border-[#00d4aa]/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(0,212,170,0.3)" stroke="#00d4aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polygon points="5 3 19 12 5 21 5 3" />
-          </svg>
+          {automation.thumbnailUrl ? (
+            <img src={automation.thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(0,212,170,0.3)" stroke="#00d4aa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          )}
         </div>
 
         {/* Info */}
