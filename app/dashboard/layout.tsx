@@ -11,7 +11,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a] flex text-[#f0f4ff]">
+    <div className="min-h-screen bg-[#F4F1EB] flex text-[#0F0F0F]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-72 flex-shrink-0">
         <DashboardSidebar />
@@ -27,7 +27,7 @@ export default function DashboardLayout({
 
       {/* Mobile Sidebar Content */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#0a0e1a] transform transition-transform duration-300 lg:hidden ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-[#F4F1EB] transform transition-transform duration-300 lg:hidden ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <DashboardSidebar />
@@ -36,10 +36,10 @@ export default function DashboardLayout({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile Top Header */}
-        <header className="lg:hidden h-16 bg-[#0a0e1a]/90 backdrop-blur-md border-b border-white/[0.07] flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="lg:hidden h-16 bg-[#F4F1EB]/90 backdrop-blur-md border-b border-[#0F0F0F]/[0.07] flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex flex-col">
-            <span className="text-sm font-black text-[#f0f4ff] tracking-tight">trigger<span className="text-[#00d4aa]">flow</span></span>
-            <span className="text-[10px] text-[#f0f4ff]/30 font-medium">Instagram automation</span>
+            <span className="text-sm font-normal text-[#0F0F0F] tracking-tight [font-family:'Instrument_Serif',serif]">triggerflow</span>
+            <span className="text-[10px] text-[#6B6660] font-medium">Instagram automation</span>
           </div>
           <button
             onClick={() => setIsSidebarOpen(true)}
@@ -62,7 +62,7 @@ export default function DashboardLayout({
           </button>
         </header>
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto cross-grid">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-[#F4F1EB]">
           {children}
         </main>
       </div>

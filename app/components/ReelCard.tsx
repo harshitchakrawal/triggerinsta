@@ -13,31 +13,28 @@ export const ReelCard = ({
   status?: "Active" | "Paused";
   thumbnailUrl?: string;
 }) => (
-  <div className="bg-white/[0.04] border border-white/[0.08] rounded-2xl p-4 flex items-center gap-4 hover:bg-white/[0.06] hover:border-[#00d4aa]/20 transition-all group backdrop-blur-sm">
-    <div className="w-16 h-16 rounded-xl bg-[#f05a28]/10 border border-black/[0.06] flex items-center justify-center relative overflow-hidden flex-shrink-0">
+  <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-2xl p-4 flex items-center gap-4 hover:bg-white/80 hover:border-[#0F0F0F]/10 transition-all group backdrop-blur-sm">
+    <div className="w-16 h-16 rounded-xl bg-[#0F0F0F]/[0.06] border border-[#0F0F0F]/[0.08] flex items-center justify-center relative overflow-hidden flex-shrink-0">
       {thumbnailUrl ? (
-        <img 
+        <img
           src={`/api/proxy-image?url=${encodeURIComponent(thumbnailUrl)}`}
-          alt="Thumbnail" 
+          alt="Thumbnail"
           className="w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
         />
-      ) : null}
-      {!thumbnailUrl && (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(240,90,40,0.4)" stroke="#f05a28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      ) : (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(15,15,15,0.15)" stroke="#6B6660" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polygon points="5 3 19 12 5 21 5 3" />
         </svg>
       )}
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="text-sm font-bold text-[#f0f4ff] truncate mb-1">{title}</h4>
-      <p className="text-[11px] text-[#f0f4ff]/40 font-medium leading-tight">
-        Keyword: <span className="text-[#00d4aa]/70">"{keyword}"</span> • {triggers} triggers
+      <h4 className="text-sm font-bold text-[#0F0F0F] truncate mb-1 [font-family:'Instrument_Serif',serif]">{title}</h4>
+      <p className="text-[11px] text-[#6B6660] font-medium leading-tight">
+        Keyword: <span className="text-[#0F0F0F]/70">"{keyword}"</span> • {triggers} triggers
       </p>
     </div>
-    <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${status === "Active" ? "bg-[#f05a28]/10 text-[#f05a28]" : "bg-black/[0.05] text-[#707070]"}`}>
+    <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${status === "Active" ? "bg-[#0F0F0F]/8 text-[#0F0F0F] border border-[#0F0F0F]/10" : "bg-[#0F0F0F]/[0.04] text-[#6B6660] border border-[#0F0F0F]/[0.07]"}`}>
       {status}
     </span>
   </div>

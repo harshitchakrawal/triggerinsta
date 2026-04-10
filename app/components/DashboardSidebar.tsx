@@ -16,17 +16,17 @@ const SidebarItem = ({
   active: boolean;
 }) => (
   <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${
-      active ? "bg-[#00d4aa]/10 text-[#00d4aa] font-semibold" : "text-[#f0f4ff]/40 hover:text-[#f0f4ff] hover:bg-white/[0.05]"
+      active ? "bg-[#0F0F0F]/8 text-[#0F0F0F] font-semibold" : "text-[#6B6660] hover:text-[#0F0F0F] hover:bg-[#0F0F0F]/[0.04]"
     }`}>
-    {active && <div className="absolute left-[-24px] w-1.5 h-5 bg-[#00d4aa] rounded-r-full shadow-[0_0_12px_rgba(0,212,170,0.5)]" />}
-    <span className={`transition-colors ${active ? "text-[#00d4aa]" : "group-hover:text-[#f0f4ff]"}`}>{icon}</span>
+    {active && <div className="absolute left-[-24px] w-1.5 h-5 bg-[#0F0F0F] rounded-r-full" />}
+    <span className={`transition-colors ${active ? "text-[#0F0F0F]" : "group-hover:text-[#0F0F0F]"}`}>{icon}</span>
     <span className="text-sm">{label}</span>
   </Link>
 );
 
 const SidebarSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div className="mb-8">
-    <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#f0f4ff]/20 mb-4">
+    <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#6B6660]/50 mb-4">
       {title}
     </h3>
     <div className="flex flex-col gap-1">
@@ -131,14 +131,14 @@ const DashboardSidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#0a0e1a] border-r border-white/[0.07] p-6 flex flex-col z-40">
+    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#F4F1EB] border-r border-[#0F0F0F]/[0.07] p-6 flex flex-col z-40">
       {/* Logo */}
       <div className="mb-12 px-3">
         <Link href="/" className="flex flex-col group">
-          <span className="text-xl font-black text-[#f0f4ff] tracking-tight leading-none mb-1">
-            trigger<span className="text-[#00d4aa]">flow</span>
+          <span className="text-xl font-normal text-[#0F0F0F] tracking-tight leading-none mb-1 [font-family:'Instrument_Serif',serif]">
+            triggerflow
           </span>
-          <span className="text-xs text-[#f0f4ff]/30 font-medium tracking-wide">Instagram automation</span>
+          <span className="text-xs text-[#6B6660] font-medium tracking-wide">Instagram automation</span>
         </Link>
       </div>
 
@@ -160,14 +160,14 @@ const DashboardSidebar = () => {
       </div>
 
       {/* User Profile */}
-      <div className="pt-6 border-t border-white/[0.07] mt-auto">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] transition-all cursor-pointer group">
-          <div className="w-10 h-10 rounded-full bg-[#00d4aa]/15 flex items-center justify-center text-[#00d4aa] font-bold text-sm">
+      <div className="pt-6 border-t border-[#0F0F0F]/[0.07] mt-auto">
+        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#0F0F0F]/[0.04] hover:bg-[#0F0F0F]/[0.07] transition-all cursor-pointer group">
+          <div className="w-10 h-10 rounded-full bg-[#0F0F0F]/8 flex items-center justify-center text-[#0F0F0F] font-bold text-sm">
             HC
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-[#f0f4ff] truncate group-hover:text-[#00d4aa] transition-colors">triggerflow123</span>
-            <span className="text-[10px] text-[#f0f4ff]/30 font-medium">Free plan</span>
+            <span className="text-sm font-bold text-[#0F0F0F] truncate group-hover:text-[#6B6660] transition-colors">triggerflow123</span>
+            <span className="text-[10px] text-[#6B6660] font-medium">Free plan</span>
           </div>
         </div>
       </div>
