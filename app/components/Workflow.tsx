@@ -105,13 +105,26 @@ export default function Workflow() {
           {/* Mini flow visual */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {[
-              { label: "Comment", icon: "💬", sub: "\"LINK\"" },
-              { label: "Reply", icon: "⚡", sub: "0.3s" },
-              { label: "DM sent", icon: "✉️", sub: "Delivered" },
+              { label: "Comment", sub: '"LINK"', icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6660" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              )},
+              { label: "Reply", sub: "0.3s", icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6660" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+              )},
+              { label: "DM sent", sub: "Delivered", icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6660" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              )},
             ].map((item, i) => (
               <div key={item.label} className="flex items-center gap-3">
                 <div className="flex flex-col items-center gap-1.5 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-[#0F0F0F]/[0.04] border border-[#0F0F0F]/[0.07] flex items-center justify-center text-xl">
+                  <div className="w-12 h-12 rounded-xl bg-[#0F0F0F]/[0.04] border border-[#0F0F0F]/[0.07] flex items-center justify-center">
                     {item.icon}
                   </div>
                   <span className="text-[10px] font-bold text-[#0F0F0F] uppercase tracking-wide">{item.label}</span>
