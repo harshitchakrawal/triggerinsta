@@ -11,25 +11,6 @@ export default function Footer() {
   return (
     <footer className="bg-[#F4F1EB] border-t border-[#0F0F0F]/[0.07]">
 
-      {/* CTA band */}
-      <div className="py-24 px-4 text-center border-b border-[#0F0F0F]/[0.07]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#6B6660] mb-4">Get started today</p>
-        <h2 className="font-serif text-[clamp(2rem,5vw,3.5rem)] font-normal leading-[1.1] tracking-tight text-[#0F0F0F] mb-4">
-          Ready to automate<br />
-          <em className="italic text-[#6B6660]">your growth?</em>
-        </h2>
-        <p className="text-sm text-[#6B6660] max-w-sm mx-auto mb-8 leading-relaxed">
-          Join 50,000+ creators already using TriggerFlow to turn comments into conversations.
-        </p>
-        <Link
-          href="/dashboard"
-          className="bg-[#0F0F0F] text-white rounded-full px-8 py-3.5 text-sm font-medium inline-flex items-center gap-2 hover:opacity-85 hover:-translate-y-px transition-all"
-        >
-          Get started free <span className="text-base">↗</span>
-        </Link>
-        <p className="text-[11px] text-[#6B6660]/50 mt-4">No credit card required · Free forever plan available</p>
-      </div>
-
       {/* Main footer grid */}
       <div className="max-w-6xl mx-auto px-8 pt-16 pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-16">
