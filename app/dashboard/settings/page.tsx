@@ -46,8 +46,8 @@ export default function SettingsPage() {
   };
 
   return (
-    <section className="relative min-h-screen bg-[#F4F1EB] px-4 py-10 sm:px-6 lg:px-8">
-      <div className="relative z-10 mx-auto w-full max-w-4xl">
+    <section className="relative min-h-screen bg-[#F4F1EB] px-4 py-10 sm:px-6 lg:px-8 flex flex-col">
+      <div className="relative z-10 w-full flex-1 flex flex-col">
 
         {/* Header */}
         <div className="mb-10">
@@ -55,7 +55,7 @@ export default function SettingsPage() {
           <p className="text-xs text-[#6B6660] mt-1">Manage your account, integrations and preferences.</p>
         </div>
 
-        <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-2xl px-8 backdrop-blur-sm">
+        <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-2xl px-8 backdrop-blur-sm flex-1">
 
           {/* Profile */}
           <Section title="Profile" desc="Your public name and contact details.">
