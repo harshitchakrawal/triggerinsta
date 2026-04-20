@@ -19,9 +19,9 @@ const Navbar = () => {
           TRIGGERFLOW
         </div>
         <ul className="hidden md:flex items-center gap-8 list-none text-[0.82rem] text-white/50">
-          <li><a href="#" className="text-[#0F0F0F] no-underline">Workflows</a></li>
-          <li><a href="#" className="text-[#0F0F0F] no-underline">Integrations</a></li>
-          <li><a href="#" className="text-[#0F0F0F] no-underline">Pricing</a></li>
+          <li><a href="#how-it-works" className="text-[#0F0F0F] no-underline hover:text-[#6B6660] transition-colors cursor-pointer">Workflow</a></li>
+          <li><a href="#how-it-works" className="text-[#0F0F0F] no-underline hover:text-[#6B6660] transition-colors cursor-pointer">Features</a></li>
+          <li><a href="#pricing" className="text-[#0F0F0F] no-underline hover:text-[#6B6660] transition-colors cursor-pointer">Pricing</a></li>
         </ul>
         <div className="flex items-center gap-8">
           <button className="text-[0.82rem] text-[#0F0F0F] bg-transparent border-none cursor-pointer ">
