@@ -75,6 +75,9 @@ export default async function Dashboard() {
 console.log("hello")
 console.log("hello")
 console.log("hello")
+console.log("checking something")
+console.log("hello")
+
   const allRules = await AutomationRule.find({}, "triggers repliesSent keyword reelUrl mediaId isActive thumbnailUrl").lean();
 
   let totalReplies = 0;
