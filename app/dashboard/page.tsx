@@ -72,7 +72,7 @@ export default async function Dashboard() {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const triggersTodayCount = await ProcessedComment.countDocuments({ createdAt: { $gte: startOfToday } });
-
+console.log("hello")
   const allRules = await AutomationRule.find({}, "triggers repliesSent keyword reelUrl mediaId isActive thumbnailUrl").lean();
 
   let totalReplies = 0;
