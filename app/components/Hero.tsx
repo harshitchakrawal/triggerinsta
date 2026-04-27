@@ -1,5 +1,7 @@
 "use client";
 
+console.log("Hello World")
+
 export default function HeroPage() {
   return (
     <div className="relative min-h-screen bg-[#F4F1EB] text-[#0F0F0F] font-sans overflow-x-hidden">
