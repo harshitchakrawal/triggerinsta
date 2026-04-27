@@ -77,6 +77,7 @@ console.log("hello")
 console.log("hello")
 console.log("checking something")
 console.log("hello")
+console.log("setting up pull push request")
 
   const allRules = await AutomationRule.find({}, "triggers repliesSent keyword reelUrl mediaId isActive thumbnailUrl").lean();
 
