@@ -1,25 +1,33 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { connectDB } from "@/app/lib/mongodb";
-import { AutomationRule } from "@/app/models/AutomationRule";
-import { ProcessedComment } from "@/app/models/ProcessedComment";
 import { ReelCard } from "@/app/components/ReelCard";
+import { useDark } from "@/app/lib/useDark";
 
 const StatCard = ({
   label,
   value,
   subValue,
+  dark,
 }: {
   label: string;
   value: string;
   subValue: string;
+  dark: boolean;
 }) => (
-  <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-2xl p-6 flex flex-col justify-between h-32 hover:bg-white/80 hover:border-[#0F0F0F]/10 transition-all group backdrop-blur-sm">
+  <div className={`border rounded-2xl p-6 flex flex-col justify-between h-32 transition-all group backdrop-blur-sm ${
+    dark 
+      ? "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20" 
+      : "bg-white/60 border-[#0F0F0F]/[0.07] hover:bg-white/80 hover:border-[#0F0F0F]/10"
+  }`}>
     <div className="flex flex-col">
-      <span className="text-3xl font-black text-[#0F0F0F] mb-1 group-hover:scale-105 transition-transform origin-left [font-family:'Instrument_Serif',serif]">{value}</span>
-      <span className="text-xs text-[#6B6660] font-medium">{label}</span>
+      <span className={`text-3xl font-black mb-1 group-hover:scale-105 transition-transform origin-left [font-family:'Instrument_Serif',serif] ${
+        dark ? "text-white" : "text-[#0F0F0F]"
+      }`}>{value}</span>
+      <span className={`text-xs font-medium ${dark ? "text-white/60" : "text-[#6B6660]"}`}>{label}</span>
     </div>
-    <div className="text-[10px] font-bold text-[#6B6660] flex items-center gap-1">
+    <div className={`text-[10px] font-bold flex items-center gap-1 ${dark ? "text-white/60" : "text-[#6B6660]"}`}>
       {subValue}
     </div>
   </div>
@@ -31,93 +39,66 @@ const ActivityItem = ({
   status,
   time,
   active = true,
+  dark,
 }: {
   user: string;
   action: string;
   status: string;
   time: string;
   active?: boolean;
+  dark: boolean;
 }) => (
-  <div className="flex items-start gap-3 py-3 border-b border-[#0F0F0F]/[0.05] last:border-0">
-    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${active ? "bg-[#0F0F0F]" : "bg-[#6B6660]/40"}`} />
+  <div className={`flex items-start gap-3 py-3 border-b last:border-0 ${
+    dark ? "border-white/10" : "border-[#0F0F0F]/[0.05]"
+  }`}>
+    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+      active 
+        ? dark ? "bg-white" : "bg-[#0F0F0F]" 
+        : dark ? "bg-white/40" : "bg-[#6B6660]/40"
+    }`} />
     <div className="flex-1 min-w-0">
-      <p className="text-xs text-[#6B6660] leading-snug">
-        <span className="font-bold text-[#0F0F0F]">@{user}</span> {action} • <span className="text-[#6B6660]/60 italic">{status}</span>
+      <p className={`text-xs leading-snug ${dark ? "text-white/60" : "text-[#6B6660]"}`}>
+        <span className={`font-bold ${dark ? "text-white" : "text-[#0F0F0F]"}`}>@{user}</span> {action} • <span className={`italic ${dark ? "text-white/40" : "text-[#6B6660]/60"}`}>{status}</span>
       </p>
     </div>
-    <span className="text-[10px] text-[#6B6660]/50 font-medium whitespace-nowrap">{time}</span>
+    <span className={`text-[10px] font-medium whitespace-nowrap ${dark ? "text-white/30" : "text-[#6B6660]/50"}`}>{time}</span>
   </div>
 );
 
-function timeAgo(date: Date) {
-  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + "y ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + "mo ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + "d ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + "h ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + "m ago";
-  return Math.max(0, Math.floor(seconds)) + "s ago";
-}
+export default function Dashboard() {
+  const { dark } = useDark();
 
-export default async function Dashboard() {
-  await connectDB();
-
-  const activeAutomationsCount = await AutomationRule.countDocuments({ isActive: true });
-
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const triggersTodayCount = await ProcessedComment.countDocuments({ createdAt: { $gte: startOfToday } });
-console.log("hello")
-console.log("hello")
-console.log("hello")
-console.log("checking something")
-console.log("hello")
-console.log("setting up pull push request")
-console.log("harhsit suar")
-console.log("hello")
-  const allRules = await AutomationRule.find({}, "triggers repliesSent keyword reelUrl mediaId isActive thumbnailUrl").lean();
-
-  let totalReplies = 0;
-  let totalTriggers = 0;
-  const activeRulesSorted = [];
-
-  for (const rule of allRules as any[]) {
-    totalReplies += rule.repliesSent || 0;
-    totalTriggers += rule.triggers || 0;
-    if (rule.isActive) activeRulesSorted.push(rule);
-  }
-
-  activeRulesSorted.sort((a, b) => b.triggers - a.triggers);
-  const topActiveReels = activeRulesSorted.slice(0, 3);
-  const successRate = totalTriggers > 0 ? Math.round((totalReplies / totalTriggers) * 100) : 0;
-
-  const recentActivityRaw = await ProcessedComment.find()
-    .sort({ createdAt: -1 })
-    .limit(5)
-    .populate("ruleId", "keyword isActive")
-    .lean();
-
-  const recentActivity = recentActivityRaw.map((a: any) => {
-    let uName = a.username;
-    if (!uName || uName === "unknown_user" || uName === "unknown") {
-      uName = a.dedupKey ? a.dedupKey.split(":")[0] : "unknown";
-    }
-    return {
-      user: uName,
-      action: `commented '${a.commentText || a.ruleId?.keyword || "..."}'`,
-      status: a.ruleId?.isActive ? "reply sent" : "paused rule, skipped",
-      time: timeAgo(new Date(a.createdAt)),
-      active: !!a.ruleId?.isActive,
-    };
+  const [data, setData] = React.useState({
+    activeAutomationsCount: 0,
+    triggersTodayCount: 0,
+    totalReplies: 0,
+    totalTriggers: 0,
+    topActiveReels: [],
+    recentActivity: [],
+    successRate: 0
   });
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch('/api/dashboard');
+        if (response.ok) {
+          const dashboardData = await response.json();
+          setData(dashboardData);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, []);
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8 bg-[#F4F1EB]">
+    <section className="relative min-h-screen overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
 
       {/* Grain overlay */}
       <div
@@ -132,85 +113,128 @@ console.log("hello")
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
-          <h1 className="text-3xl font-normal text-[#0F0F0F] tracking-tight [font-family:'Instrument_Serif',serif]">
+          <h1 className={`text-3xl font-normal tracking-tight [font-family:'Instrument_Serif',serif] ${
+            dark ? "text-white" : "text-[#0F0F0F]"
+          }`}>
             My automations
           </h1>
           <div className="flex items-center gap-4">
-            <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-xl px-4 py-2 flex items-center gap-3 backdrop-blur-sm">
+            <div className={`border rounded-xl px-4 py-2 flex items-center gap-3 backdrop-blur-sm ${
+              dark 
+                ? "bg-white/5 border-white/10" 
+                : "bg-white/60 border-[#0F0F0F]/[0.07]"
+            }`}>
               <div className="text-right">
-                <p className="text-[10px] text-[#6B6660] font-bold uppercase tracking-widest leading-none mb-1">Connected:</p>
-                <p className="text-sm font-bold text-[#0F0F0F] leading-none">triggerflow123</p>
+                <p className={`text-[10px] font-bold uppercase tracking-widest leading-none mb-1 ${
+                  dark ? "text-white/60" : "text-[#6B6660]"
+                }`}>Connected:</p>
+                <p className={`text-sm font-bold leading-none ${
+                  dark ? "text-white" : "text-[#0F0F0F]"
+                }`}>triggerflow123</p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-[#0F0F0F]/8 flex items-center justify-center text-[10px] font-bold text-[#0F0F0F]">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                dark ? "bg-white/8 text-white" : "bg-[#0F0F0F]/8 text-[#0F0F0F]"
+              }`}>
                 HC
               </div>
             </div>
-            <Link href="/dashboard/create" className="text-white font-medium text-sm px-6 py-3 rounded-full hover:-translate-y-0.5 transition-all active:translate-y-0 bg-[#0F0F0F] hover:opacity-85">
+            <Link href="/dashboard/create" className={`font-medium text-sm px-6 py-3 rounded-full hover:-translate-y-0.5 transition-all active:translate-y-0 hover:opacity-85 ${
+              dark ? "text-[#0F0F0F] bg-white" : "text-white bg-[#0F0F0F]"
+            }`}>
               + New automation
             </Link>
           </div>
         </div>
 
-        {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-          <StatCard label="Active automations" value={activeAutomationsCount.toString()} subValue="Live now" />
-          <StatCard label="Triggers today" value={triggersTodayCount.toString()} subValue="Since midnight" />
-          <StatCard label="Replies sent" value={totalReplies.toString()} subValue={`${successRate}% success rate`} />
-          <StatCard label="Total all time" value={totalTriggers.toString()} subValue="All time triggers" />
-        </div>
-
-        {/* Bottom grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-5">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-bold text-[#0F0F0F] uppercase tracking-widest opacity-50">Active reels</h3>
-              <Link href="/dashboard/automations" className="text-[10px] font-bold text-[#6B6660] hover:text-[#0F0F0F] transition-colors">See all →</Link>
-            </div>
-            <div className="space-y-3">
-              {topActiveReels.length > 0 ? (
-                topActiveReels.map((rule) => (
-                  <ReelCard
-                    key={rule._id?.toString() || rule.mediaId}
-                    title={rule.reelUrl || rule.mediaId || "Reel"}
-                    keyword={rule.keyword}
-                    triggers={rule.triggers || 0}
-                    status={rule.isActive ? "Active" : "Paused"}
-                    thumbnailUrl={(rule as any).thumbnailUrl}
-                  />
-                ))
-              ) : (
-                <div className="text-xs text-[#6B6660] font-medium bg-white/60 p-4 border border-[#0F0F0F]/[0.07] rounded-xl text-center">
-                  No active reels right now.
-                </div>
-              )}
-            </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className={`animate-spin rounded-full h-8 w-8 border-b-2 ${
+              dark ? "border-white" : "border-[#0F0F0F]"
+            }`}></div>
           </div>
+        ) : (
+          <>
+            {/* Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+              <StatCard label="Active automations" value={data.activeAutomationsCount.toString()} subValue="Live now" dark={dark} />
+              <StatCard label="Triggers today" value={data.triggersTodayCount.toString()} subValue="Since midnight" dark={dark} />
+              <StatCard label="Replies sent" value={data.totalReplies.toString()} subValue={`${data.successRate}% success rate`} dark={dark} />
+              <StatCard label="Total all time" value={data.totalTriggers.toString()} subValue="All time triggers" dark={dark} />
+            </div>
 
-          <div className="lg:col-span-7 bg-white/60 border border-[#0F0F0F]/[0.07] rounded-3xl p-6 mt-11 backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-bold text-[#0F0F0F] uppercase tracking-widest opacity-50">Recent activity</h3>
-              <button className="text-[10px] font-bold text-[#6B6660] hover:text-[#0F0F0F] transition-colors">See all →</button>
-            </div>
-            <div className="flex flex-col">
-              {recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <ActivityItem
-                    key={index}
-                    user={activity.user}
-                    action={activity.action}
-                    status={activity.status}
-                    time={activity.time}
-                    active={activity.active}
-                  />
-                ))
-              ) : (
-                <div className="text-xs text-[#6B6660] font-medium py-4 text-center">
-                  No recent activity found.
+            {/* Bottom grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-5">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`text-xs font-bold uppercase tracking-widest opacity-50 ${
+                    dark ? "text-white" : "text-[#0F0F0F]"
+                  }`}>Active reels</h3>
+                  <Link href="/dashboard/automations" className={`text-[10px] font-bold transition-colors ${
+                    dark ? "text-white/60 hover:text-white" : "text-[#6B6660] hover:text-[#0F0F0F]"
+                  }`}>See all →</Link>
                 </div>
-              )}
+                <div className="space-y-3">
+                  {data.topActiveReels.length > 0 ? (
+                    data.topActiveReels.map((rule: any) => (
+                      <ReelCard
+                        key={rule._id?.toString() || rule.mediaId}
+                        title={rule.reelUrl || rule.mediaId || "Reel"}
+                        keyword={rule.keyword}
+                        triggers={rule.triggers || 0}
+                        status={rule.isActive ? "Active" : "Paused"}
+                        mediaId={rule.mediaId}
+                      />
+                    ))
+                  ) : (
+                    <div className={`text-xs font-medium p-4 border rounded-xl text-center ${
+                      dark 
+                        ? "text-white/60 bg-white/5 border-white/10" 
+                        : "text-[#6B6660] bg-white/60 border-[#0F0F0F]/[0.07]"
+                    }`}>
+                      No active reels right now.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={`lg:col-span-7 border rounded-3xl p-6 mt-11 backdrop-blur-sm ${
+                dark 
+                  ? "bg-white/5 border-white/10" 
+                  : "bg-white/60 border-[#0F0F0F]/[0.07]"
+              }`}>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className={`text-xs font-bold uppercase tracking-widest opacity-50 ${
+                    dark ? "text-white" : "text-[#0F0F0F]"
+                  }`}>Recent activity</h3>
+                  <button className={`text-[10px] font-bold transition-colors ${
+                    dark ? "text-white/60 hover:text-white" : "text-[#6B6660] hover:text-[#0F0F0F]"
+                  }`}>See all →</button>
+                </div>
+                <div className="flex flex-col">
+                  {data.recentActivity.length > 0 ? (
+                    data.recentActivity.map((activity: any, index: number) => (
+                      <ActivityItem
+                        key={index}
+                        user={activity.user}
+                        action={activity.action}
+                        status={activity.status}
+                        time={activity.time}
+                        active={activity.active}
+                        dark={dark}
+                      />
+                    ))
+                  ) : (
+                    <div className={`text-xs font-medium py-4 text-center ${
+                      dark ? "text-white/60" : "text-[#6B6660]"
+                    }`}>
+                      No recent activity found.
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <style>{`

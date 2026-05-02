@@ -83,8 +83,8 @@ function AutomationCard({ automation, onToggle, onEdit, onPauseResume, onDelete 
     <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-2xl p-6 flex flex-col gap-4 transition-all duration-200 backdrop-blur-sm hover:border-[#0F0F0F]/10 hover:bg-white/80">
       <div className="flex items-start gap-3.5">
         <div className="w-20 h-20 rounded-xl bg-[#0F0F0F]/[0.04] border border-[#0F0F0F]/[0.07] flex items-center justify-center flex-shrink-0 overflow-hidden">
-          {automation.thumbnailUrl ? (
-            <img src={automation.thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" />
+          {automation.mediaId ? (
+            <img src={`/api/proxy-image?mediaId=${encodeURIComponent(automation.mediaId)}`} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(15,15,15,0.15)" stroke="#6B6660" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="5 3 19 12 5 21 5 3" />
