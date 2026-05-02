@@ -3,30 +3,39 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDark } from "@/app/lib/useDark";
 
 const SidebarItem = ({
   href,
   icon,
   label,
   active,
+  dark,
 }: {
   href: string;
   icon: React.ReactNode;
   label: string;
   active: boolean;
+  dark: boolean;
 }) => (
   <Link href={href} className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group relative ${
-      active ? "bg-[#0F0F0F]/8 text-[#0F0F0F] font-semibold" : "text-[#6B6660] hover:text-[#0F0F0F] hover:bg-[#0F0F0F]/[0.04]"
+      active 
+        ? dark 
+          ? "bg-white/10 text-white font-semibold" 
+          : "bg-[#0F0F0F]/8 text-[#0F0F0F] font-semibold"
+        : dark
+          ? "text-white/60 hover:text-white hover:bg-white/[0.04]"
+          : "text-[#6B6660] hover:text-[#0F0F0F] hover:bg-[#0F0F0F]/[0.04]"
     }`}>
-    {active && <div className="absolute left-[-24px] w-1.5 h-5 bg-[#0F0F0F] rounded-r-full" />}
-    <span className={`transition-colors ${active ? "text-[#0F0F0F]" : "group-hover:text-[#0F0F0F]"}`}>{icon}</span>
+    {active && <div className={`absolute left-[-24px] w-1.5 h-5 rounded-r-full ${dark ? "bg-white" : "bg-[#0F0F0F]"}`} />}
+    <span className={`transition-colors ${active ? (dark ? "text-white" : "text-[#0F0F0F]") : (dark ? "group-hover:text-white" : "group-hover:text-[#0F0F0F]")}`}>{icon}</span>
     <span className="text-sm">{label}</span>
   </Link>
 );
 
-const SidebarSection = ({ title, children }: { title: string; children: React.ReactNode }) => (
+const SidebarSection = ({ title, children, dark }: { title: string; children: React.ReactNode; dark: boolean }) => (
   <div className="mb-8">
-    <h3 className="px-3 text-[10px] font-bold uppercase tracking-widest text-[#6B6660]/50 mb-4">
+    <h3 className={`px-3 text-[10px] font-bold uppercase tracking-widest mb-4 ${dark ? "text-white/30" : "text-[#6B6660]/50"}`}>
       {title}
     </h3>
     <div className="flex flex-col gap-1">
@@ -37,6 +46,7 @@ const SidebarSection = ({ title, children }: { title: string; children: React.Re
 
 const DashboardSidebar = () => {
   const pathname = usePathname();
+  const { dark } = useDark();
 
   const sections = [
     {
@@ -49,6 +59,17 @@ const DashboardSidebar = () => {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+          ),
+        },
+        {
+          label: "My Instagram",
+          href: "/dashboard/instagram",
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+              <circle cx="12" cy="12" r="4" />
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
             </svg>
           ),
         },
@@ -131,21 +152,27 @@ const DashboardSidebar = () => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#F4F1EB] border-r border-[#0F0F0F]/[0.07] p-6 flex flex-col z-40">
+    <aside className={`fixed left-0 top-0 bottom-0 w-72 border-r p-6 flex flex-col z-40 ${
+      dark 
+        ? "bg-[#0a0e1a] border-white/[0.07]" 
+        : "bg-[#F4F1EB] border-[#0F0F0F]/[0.07]"
+    }`}>
       {/* Logo */}
       <div className="mb-12 px-3">
         <Link href="/" className="flex flex-col group">
-          <span className="text-xl font-normal text-[#0F0F0F] tracking-tight leading-none mb-1 [font-family:'Instrument_Serif',serif]">
+          <span className={`text-xl font-normal tracking-tight leading-none mb-1 [font-family:'Instrument_Serif',serif] ${
+            dark ? "text-white" : "text-[#0F0F0F]"
+          }`}>
             triggerflow
           </span>
-          <span className="text-xs text-[#6B6660] font-medium tracking-wide">Instagram automation</span>
+          <span className={`text-xs font-medium tracking-wide ${dark ? "text-white/60" : "text-[#6B6660]"}`}>Instagram automation</span>
         </Link>
       </div>
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto">
         {sections.map((section) => (
-          <SidebarSection key={section.title} title={section.title}>
+          <SidebarSection key={section.title} title={section.title} dark={dark}>
             {section.items.map((item) => (
               <SidebarItem
                 key={item.href}
@@ -153,6 +180,7 @@ const DashboardSidebar = () => {
                 icon={item.icon}
                 label={item.label}
                 active={pathname === item.href}
+                dark={dark}
               />
             ))}
           </SidebarSection>
@@ -160,14 +188,24 @@ const DashboardSidebar = () => {
       </div>
 
       {/* User Profile */}
-      <div className="pt-6 border-t border-[#0F0F0F]/[0.07] mt-auto">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#0F0F0F]/[0.04] hover:bg-[#0F0F0F]/[0.07] transition-all cursor-pointer group">
-          <div className="w-10 h-10 rounded-full bg-[#0F0F0F]/8 flex items-center justify-center text-[#0F0F0F] font-bold text-sm">
+      <div className={`pt-6 border-t mt-auto ${dark ? "border-white/[0.07]" : "border-[#0F0F0F]/[0.07]"}`}>
+        <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all cursor-pointer group ${
+          dark 
+            ? "bg-white/[0.04] hover:bg-white/[0.07]" 
+            : "bg-[#0F0F0F]/[0.04] hover:bg-[#0F0F0F]/[0.07]"
+        }`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
+            dark ? "bg-white/8 text-white" : "bg-[#0F0F0F]/8 text-[#0F0F0F]"
+          }`}>
             HC
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-[#0F0F0F] truncate group-hover:text-[#6B6660] transition-colors">triggerflow123</span>
-            <span className="text-[10px] text-[#6B6660] font-medium">Free plan</span>
+            <span className={`text-sm font-bold truncate transition-colors ${
+              dark 
+                ? "text-white group-hover:text-white/60" 
+                : "text-[#0F0F0F] group-hover:text-[#6B6660]"
+            }`}>triggerflow123</span>
+            <span className={`text-[10px] font-medium ${dark ? "text-white/60" : "text-[#6B6660]"}`}>Free plan</span>
           </div>
         </div>
       </div>

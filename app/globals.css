@@ -1,12 +1,13 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 :root {
-  --bg:        #0a0e1a;
+  --bg:        #F4F1EB;
   --bg-card:   rgba(255,255,255,0.04);
   --border:    rgba(255,255,255,0.08);
   --accent:    #00d4aa;
   --accent2:   #7c6af7;
-  --text:      #f0f4ff;
+  --text:      #0F0F0F;
   --muted:     rgba(240,244,255,0.4);
 }
 
@@ -30,6 +31,21 @@ body {
   color: var(--text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background 0.3s ease;
+}
+
+html.dark body,
+html.dark main,
+html.dark section,
+html.dark footer,
+html.dark div.relative.min-h-screen {
+  background: transparent !important;
+}
+
+/* ── Prism fade in ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Grid patterns ── */

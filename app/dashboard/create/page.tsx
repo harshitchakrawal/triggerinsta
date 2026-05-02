@@ -3,19 +3,25 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function CreateAutomation() {
+  // --- CREATE mode state (only used when creating a new automation) ---
+  const [reelUrl, setReelUrl] = useState("");
   const [mediaId, setMediaId] = useState("");
   const [caption, setCaption] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState("");
-  const [reelUrl, setReelUrl] = useState("");
+
+  // --- Shared form state ---
   const [keywords, setKeywords] = useState<string[]>(["link"]);
   const [newKeyword, setNewKeyword] = useState("");
   const [replyToComment, setreplyToComment] = useState("Hey! I just sent you the link in DMs — check your inbox!");
   const [replyToDm, setreplyToDm] = useState("Here's the resource you asked for: https://yourlink.com");
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // --- EDIT mode state (fetched from DB, never mixed with create form state) ---
   const [editing, setEditing] = useState(false);
   const [editId, setEditId] = useState("");
+  const [dbData, setDbData] = useState<{ mediaId: string; reelUrl: string; caption: string } | null>(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -25,9 +31,9 @@ export default function CreateAutomation() {
       setEditId(edit);
       fetch("/api/rules?edit=" + edit).then(r => r.json()).then(data => {
         const rule = data.rule;
-        setMediaId(rule.mediaId);
-        setReelUrl(rule.reelUrl || "");
-        setCaption(rule.caption || "");
+        // Store reel/media/caption from DB separately — not in create-form state
+        const fetched = { mediaId: rule.mediaId, reelUrl: rule.reelUrl || "", caption: rule.caption || "" };
+        setDbData(fetched);
         setKeywords(rule.keyword.split(",").map((k: string) => k.trim()));
         setreplyToComment(rule.replyToComment);
         setreplyToDm(rule.replyToDM);
@@ -54,7 +60,10 @@ export default function CreateAutomation() {
     if (keywords.length === 0) { alert("Please add at least one keyword"); return; }
     setLoading(true);
     try {
-      const body = { ...(editing ? { id: editId } : {}), mediaId, reelUrl, caption, keyword: keywords.join(","), replyToComment, replyToDm };
+      // On edit: use DB values for mediaId/reelUrl/caption; on create: use form state
+      const body = editing
+        ? { id: editId, mediaId: dbData?.mediaId, reelUrl: dbData?.reelUrl, caption: dbData?.caption, keyword: keywords.join(","), replyToComment, replyToDm }
+        : { mediaId, reelUrl, caption, keyword: keywords.join(","), replyToComment, replyToDm };
       const res = await fetch("/api/rules", { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); if (editing) window.location.href = "/dashboard/automations"; }
       else alert("Failed to save automation. Please try again.");
@@ -101,25 +110,29 @@ export default function CreateAutomation() {
             <div className="space-y-8">
               <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-xl p-6 backdrop-blur-md space-y-3">
                 <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6660]">Reel URL</label>
-                <input
-                  className="w-full bg-transparent border-b border-[#0F0F0F]/[0.08] py-3 text-sm font-medium text-[#0F0F0F] focus:outline-none focus:border-[#0F0F0F]/40 transition-all placeholder:text-[#6B6660]/40"
-                  value={reelUrl} onChange={(e) => handleUrlChange(e.target.value)}
-                  placeholder="https://www.instagram.com/reel/ABC123..."
-                />
-                {verifying && <p className="text-[11px] text-[#6B6660] flex items-center gap-1.5"><span className="w-3 h-3 border border-[#6B6660] border-t-transparent rounded-full animate-spin inline-block" />Verifying...</p>}
-                {verifyError && <p className="text-[11px] text-red-500">{verifyError}</p>}
+                {editing ? (
+                  <div className="py-3 text-sm font-medium text-[#0F0F0F]/70 truncate">{dbData?.reelUrl || "Loading..."}</div>
+                ) : (
+                  <input
+                    className="w-full bg-transparent border-b border-[#0F0F0F]/[0.08] py-3 text-sm font-medium text-[#0F0F0F] focus:outline-none focus:border-[#0F0F0F]/40 transition-all placeholder:text-[#6B6660]/40"
+                    value={reelUrl} onChange={(e) => handleUrlChange(e.target.value)}
+                    placeholder="https://www.instagram.com/reel/ABC123..."
+                  />
+                )}
+                {!editing && verifying && <p className="text-[11px] text-[#6B6660] flex items-center gap-1.5"><span className="w-3 h-3 border border-[#6B6660] border-t-transparent rounded-full animate-spin inline-block" />Verifying...</p>}
+                {!editing && verifyError && <p className="text-[11px] text-red-500">{verifyError}</p>}
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-xl p-6 backdrop-blur-md space-y-3 opacity-90">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6660]">Media ID</label>
-                  <div className="text-sm font-medium text-[#6B6660]/60 italic truncate">{mediaId || "Auto-extracted from URL"}</div>
+                  <div className="text-sm font-medium text-[#6B6660]/60 italic truncate">{editing ? (dbData?.mediaId || "Loading...") : (mediaId || "Auto-extracted from URL")}</div>
                   <div className="h-px bg-[#0F0F0F]/[0.07]" />
                   <p className="text-[10px] text-[#6B6660]/60 font-medium leading-tight italic">This is what Instagram uses to identify your reel</p>
                 </div>
                 <div className="bg-white/60 border border-[#0F0F0F]/[0.07] rounded-xl p-6 backdrop-blur-md space-y-3 opacity-90">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6660]">Caption</label>
-                  <div className="text-sm font-medium text-[#0F0F0F]/70 line-clamp-3">{caption || "Auto-extracted from reel"}</div>
+                  <div className="text-sm font-medium text-[#0F0F0F]/70 line-clamp-3">{editing ? (dbData?.caption || "Auto-extracted from reel") : (caption || "Auto-extracted from reel")}</div>
                   <div className="h-px bg-[#0F0F0F]/[0.07]" />
                   <p className="text-[10px] text-[#6B6660]/60 font-medium leading-tight italic">The text description of your reel</p>
                 </div>
