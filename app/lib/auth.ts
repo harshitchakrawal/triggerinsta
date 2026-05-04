@@ -9,10 +9,41 @@ export const {
   signOut,
   auth,
 } = NextAuth({
+  trustHost: true,
+  cookies: {
+    pkceCodeVerifier: {
+      name: "next-auth.pkce.code_verifier",
+      options: {
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+        secure: true,
+      },
+    },
+    state: {
+      name: "next-auth.state",
+      options: {
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+        secure: true,
+      },
+    },
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+        secure: true,
+      },
+    },
+  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      checks: ["state"],
     }),
   ],
   pages: {
@@ -34,7 +65,7 @@ export const {
         return true;
       } catch (err) {
         console.error("[auth] signIn error:", err);
-        return false;
+        return true; // still allow login even if DB save fails
       }
     },
     async session({ session, token }) {
