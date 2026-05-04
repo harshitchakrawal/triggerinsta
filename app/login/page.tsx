@@ -12,11 +12,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      window.location.href = "/dashboard";
-    }, 1200);
+    // Email/password auth not implemented yet
   };
 
   const handleGoogleSignIn = async () => {
@@ -175,7 +171,8 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white/60 border border-[#0F0F0F]/[0.1] rounded-full py-3 text-sm font-medium text-[#0F0F0F] hover:bg-white/90 transition-all backdrop-blur-sm disabled:opacity-50"
+            type="button"
+            className="w-full flex items-center justify-center gap-3 bg-white/60 border border-[#0F0F0F]/[0.1] rounded-full py-3 text-sm font-medium text-[#0F0F0F] hover:bg-white/90 transition-all backdrop-blur-sm disabled:opacity-50 relative z-10"
           >
             {googleLoading ? (
               <div className="w-4 h-4 border-2 border-[#0F0F0F]/20 border-t-[#0F0F0F] rounded-full animate-spin" />
@@ -193,7 +190,7 @@ export default function LoginPage() {
           {/* Sign up link */}
           <p className="text-center text-xs text-[#6B6660] mt-6">
             Don&apos;t have an account?{" "}
-            <Link href="/dashboard" className="text-[#0F0F0F] font-medium hover:underline">
+            <Link href="/signup" className="text-[#0F0F0F] font-medium hover:underline">
               Sign up free
             </Link>
           </p>
