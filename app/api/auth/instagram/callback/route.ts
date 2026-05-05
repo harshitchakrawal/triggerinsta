@@ -10,11 +10,11 @@ export async function GET(request: Request) {
     const error = searchParams.get('error');
 
     if (error) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=access_denied', process.env.NEXTAUTH_URL));
+      return NextResponse.redirect(new URL('/dashboard/instagram?error=access_denied', 'http://localhost:3000'));
     }
 
     if (!code || !state) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=invalid_request', process.env.NEXTAUTH_URL));
+      return NextResponse.redirect(new URL('/dashboard/instagram?error=invalid_request', 'http://localhost:3000'));
     }
 
     const appId = process.env.FACEBOOK_APP_ID;
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
       throw new Error("Instagram OAuth credentials not configured");
     }
 
-    // Step 1: Exchange code for access token via Facebook
+    // Step 1: Exchange code for access token
     const tokenResponse = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
 
     // Step 4: Get Instagram account details
     const accountResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${instagramAccountId}?fields=id,username,account_type&access_token=${pageAccessToken}`
+      `https://graph.facebook.com/v18.0/${instagramAccountId}?fields=id,username&access_token=${pageAccessToken}`
     );
     const accountData = await accountResponse.json();
     console.log('Account data:', accountData);
@@ -83,25 +83,27 @@ export async function GET(request: Request) {
     // Step 5: Save to database
     await connectDB();
     const userEmail = decodeURIComponent(state);
-    await User.findOneAndUpdate(
+    console.log('Saving to DB for user:', userEmail);
+    const updatedUser = await User.findOneAndUpdate(
       { email: userEmail },
       {
         $set: {
           'instagram.isConnected': true,
           'instagram.accessToken': pageAccessToken,
           'instagram.accountId': instagramAccountId,
-          'instagram.username': accountData.username,
-          'instagram.accountType': accountData.account_type,
+          'instagram.username': accountData.username || 'unknown',
+          'instagram.accountType': 'BUSINESS',
           'instagram.connectedAt': new Date(),
         }
       },
       { new: true }
     );
+    console.log('Updated user:', updatedUser?.email, 'instagram:', updatedUser?.instagram);
 
-    return NextResponse.redirect(new URL('/dashboard/instagram?success=connected', process.env.NEXTAUTH_URL));
+    return NextResponse.redirect(new URL('/dashboard/instagram?success=connected', 'http://localhost:3000'));
 
   } catch (error: any) {
     console.error("Instagram OAuth callback error:", error);
-    return NextResponse.redirect(new URL(`/dashboard/instagram?error=${encodeURIComponent(error.message)}`, process.env.NEXTAUTH_URL));
+    return NextResponse.redirect(new URL(`/dashboard/instagram?error=${encodeURIComponent(error.message)}`, 'http://localhost:3000'));
   }
 }

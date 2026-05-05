@@ -4,6 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useDark } from "@/app/lib/useDark";
+import { HeartIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
+import { ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid } from "@heroicons/react/24/solid";
 
 interface InstagramMedia {
   id: string;
@@ -15,6 +17,14 @@ interface InstagramMedia {
   timestamp: string;
   like_count?: number;
   comments_count?: number;
+}
+
+interface AutomationRule {
+  _id: string;
+  mediaId: string;
+  keyword: string;
+  isActive: boolean;
+  triggers: number;
 }
 
 interface AccountInfo {
@@ -31,11 +41,13 @@ export default function MyInstagramPage() {
   const [isConnected, setIsConnected] = React.useState(false);
   const [account, setAccount] = React.useState<AccountInfo | null>(null);
   const [media, setMedia] = React.useState<InstagramMedia[]>([]);
+  const [rules, setRules] = React.useState<AutomationRule[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [mediaLoading, setMediaLoading] = React.useState(false);
   const [disconnecting, setDisconnecting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
+  const [togglingId, setTogglingId] = React.useState<string | null>(null);
 
   // Check for success/error from OAuth callback
   React.useEffect(() => {
@@ -68,9 +80,14 @@ export default function MyInstagramPage() {
   async function fetchMedia() {
     setMediaLoading(true);
     try {
-      const res = await fetch('/api/instagram/media');
-      const data = await res.json();
-      if (data.success) setMedia(data.media || []);
+      const [mediaRes, rulesRes] = await Promise.all([
+        fetch('/api/instagram/media'),
+        fetch('/api/rules')
+      ]);
+      const mediaData = await mediaRes.json();
+      const rulesData = await rulesRes.json();
+      if (mediaData.success) setMedia(mediaData.media || []);
+      if (rulesData.rules) setRules(rulesData.rules);
     } catch (err) {
       console.error('Error fetching media:', err);
     } finally {
@@ -80,6 +97,25 @@ export default function MyInstagramPage() {
 
   const handleConnect = () => {
     window.location.href = '/api/auth/instagram';
+  };
+
+  const handleToggleRule = async (ruleId: string) => {
+    setTogglingId(ruleId);
+    try {
+      const res = await fetch('/api/rules', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ruleId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRules(prev => prev.map(r => r._id === ruleId ? { ...r, isActive: data.rule.isActive } : r));
+      }
+    } catch (err) {
+      console.error('Error toggling rule:', err);
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleDisconnect = async () => {
@@ -141,26 +177,29 @@ export default function MyInstagramPage() {
         {isConnected && account ? (
           <>
             {/* Connected account card */}
-            <div className={`${cardClass} p-6 flex items-center justify-between mb-8`}>
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full border flex items-center justify-center text-sm font-bold ${
-                  dark ? "bg-white/[0.06] border-white/[0.08] text-white" : "bg-[#0F0F0F]/[0.06] border-[#0F0F0F]/[0.08] text-[#0F0F0F]"
+            <div className={`flex items-center justify-between mb-8 pb-6 border-b ${
+              dark ? "border-white/[0.07]" : "border-[#0F0F0F]/[0.06]"
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                  dark ? "bg-white/10 text-white" : "bg-[#0F0F0F]/8 text-[#0F0F0F]"
                 }`}>
                   {account.username?.[0]?.toUpperCase() || "IG"}
                 </div>
                 <div>
-                  <p className={`text-sm font-bold ${dark ? "text-white" : "text-[#0F0F0F]"}`}>@{account.username}</p>
-                  <p className={`text-[11px] font-medium ${dark ? "text-white/60" : "text-[#6B6660]"}`}>{account.accountType || "Instagram Business Account"}</p>
+                  <p className={`text-sm font-medium ${dark ? "text-white" : "text-[#0F0F0F]"}`}>@{account.username}</p>
                 </div>
-                <div className="flex items-center gap-1.5 bg-green-50 border border-green-100 px-3 py-1 rounded-full">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  <span className="text-[10px] font-bold text-green-700 uppercase tracking-wide">Connected</span>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10">
+                  <div className="w-1 h-1 rounded-full bg-green-500" />
+                  <span className="text-[10px] font-medium text-green-600">Connected</span>
                 </div>
               </div>
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
-                className="text-xs font-medium text-red-500 hover:text-red-600 border border-red-100 px-4 py-2 rounded-full hover:bg-red-50 transition-all disabled:opacity-50"
+                className={`text-xs font-medium transition-colors disabled:opacity-50 ${
+                  dark ? "text-white/40 hover:text-white/70" : "text-[#6B6660] hover:text-red-500"
+                }`}
               >
                 {disconnecting ? "Disconnecting..." : "Disconnect"}
               </button>
@@ -218,36 +257,105 @@ export default function MyInstagramPage() {
 
                         {/* Stats */}
                         <div className={`flex items-center gap-3 mb-3 text-[10px] font-medium ${dark ? "text-white/40" : "text-[#6B6660]/60"}`}>
-                          <span>❤️ {post.like_count ?? 0}</span>
-                          <span>💬 {post.comments_count ?? 0}</span>
+                          <span className="flex items-center gap-1">
+                            <HeartIcon className="w-3 h-3" />
+                            {post.like_count ?? 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <ChatBubbleOvalLeftIconSolid className="w-3 h-3" />
+                            {post.comments_count ?? 0}
+                          </span>
                           <span className="ml-auto">{new Date(post.timestamp).toLocaleDateString()}</span>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/dashboard/create?reelUrl=${encodeURIComponent(post.permalink)}`}
-                            className={`flex-1 text-center text-[11px] font-bold py-2 rounded-lg transition-all ${
-                              dark ? "bg-white text-[#0F0F0F] hover:bg-white/90" : "bg-[#0F0F0F] text-white hover:opacity-85"
-                            }`}
-                          >
-                            + Create Automation
-                          </Link>
-                          <a
-                            href={post.permalink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={`p-2 rounded-lg border transition-all ${
-                              dark ? "border-white/10 hover:bg-white/10 text-white/60" : "border-[#0F0F0F]/10 hover:bg-[#0F0F0F]/5 text-[#6B6660]"
-                            }`}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                              <polyline points="15 3 21 3 21 9" />
-                              <line x1="10" y1="14" x2="21" y2="3" />
-                            </svg>
-                          </a>
-                        </div>
+                        {(() => {
+                          const rule = rules.find(r => r.mediaId === post.id);
+                          if (rule) {
+                            return (
+                              <div className={`rounded-xl p-3 border ${
+                                dark ? "bg-white/[0.03] border-white/[0.07]" : "bg-[#0F0F0F]/[0.02] border-[#0F0F0F]/[0.06]"
+                              }`}>
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-1.5">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${rule.isActive ? "bg-green-500" : "bg-[#6B6660]/40"}`} />
+                                    <span className={`text-[10px] font-medium ${
+                                      rule.isActive 
+                                        ? "text-green-600" 
+                                        : dark ? "text-white/40" : "text-[#6B6660]"
+                                    }`}>
+                                      {rule.isActive ? "Automation active" : "Automation paused"}
+                                    </span>
+                                  </div>
+                                  <span className={`text-[10px] font-medium ${dark ? "text-white/40" : "text-[#6B6660]/60"}`}>
+                                    keyword: <span className={`font-bold ${dark ? "text-white/60" : "text-[#0F0F0F]/60"}`}>"{rule.keyword}"</span>
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => handleToggleRule(rule._id)}
+                                    disabled={togglingId === rule._id}
+                                    className={`flex-1 text-center text-[11px] font-bold py-2 rounded-lg transition-all disabled:opacity-50 ${
+                                      rule.isActive
+                                        ? dark ? "bg-white/10 text-white hover:bg-white/20" : "bg-[#0F0F0F]/[0.06] text-[#0F0F0F] hover:bg-[#0F0F0F]/10"
+                                        : dark ? "bg-white text-[#0F0F0F] hover:bg-white/90" : "bg-[#0F0F0F] text-white hover:opacity-85"
+                                    }`}
+                                  >
+                                    {togglingId === rule._id ? "..." : rule.isActive ? "Pause" : "Resume"}
+                                  </button>
+                                  <Link
+                                    href={`/dashboard/create?edit=${rule._id}`}
+                                    className={`flex-1 text-center text-[11px] font-bold py-2 rounded-lg border transition-all ${
+                                      dark ? "border-white/10 text-white/60 hover:bg-white/10" : "border-[#0F0F0F]/10 text-[#6B6660] hover:bg-[#0F0F0F]/5"
+                                    }`}
+                                  >
+                                    Edit
+                                  </Link>
+                                  <a
+                                    href={post.permalink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`p-2 rounded-lg border transition-all ${
+                                      dark ? "border-white/10 hover:bg-white/10 text-white/60" : "border-[#0F0F0F]/10 hover:bg-[#0F0F0F]/5 text-[#6B6660]"
+                                    }`}
+                                  >
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                      <polyline points="15 3 21 3 21 9" />
+                                      <line x1="10" y1="14" x2="21" y2="3" />
+                                    </svg>
+                                  </a>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/dashboard/create?reelUrl=${encodeURIComponent(post.permalink)}`}
+                                className={`flex-1 text-center text-[11px] font-bold py-2 rounded-lg transition-all ${
+                                  dark ? "bg-white text-[#0F0F0F] hover:bg-white/90" : "bg-[#0F0F0F] text-white hover:opacity-85"
+                                }`}
+                              >
+                                Automate this post
+                              </Link>
+                              <a
+                                href={post.permalink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`p-2 rounded-lg border transition-all ${
+                                  dark ? "border-white/10 hover:bg-white/10 text-white/60" : "border-[#0F0F0F]/10 hover:bg-[#0F0F0F]/5 text-[#6B6660]"
+                                }`}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                              </a>
+                            </div>
+                          );
+                        })()}
                       </div>
                     );
                   })}
