@@ -26,18 +26,21 @@ export default function CreateAutomation() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const edit = urlParams.get("edit");
+    const prefilledUrl = urlParams.get("reelUrl");
+
     if (edit) {
       setEditing(true);
       setEditId(edit);
       fetch("/api/rules?edit=" + edit).then(r => r.json()).then(data => {
         const rule = data.rule;
-        // Store reel/media/caption from DB separately — not in create-form state
         const fetched = { mediaId: rule.mediaId, reelUrl: rule.reelUrl || "", caption: rule.caption || "" };
         setDbData(fetched);
         setKeywords(rule.keyword.split(",").map((k: string) => k.trim()));
         setreplyToComment(rule.replyToComment);
         setreplyToDm(rule.replyToDM);
       });
+    } else if (prefilledUrl) {
+      handleUrlChange(prefilledUrl);
     }
   }, []);
 

@@ -6,38 +6,26 @@ import { User } from "@/app/models/User";
 export async function GET() {
   try {
     const session = await auth();
+    console.log('Status check session:', session?.user?.email);
+    
     if (!session?.user?.email) {
       return NextResponse.json({ isConnected: false, error: "Not authenticated" });
     }
 
     await connectDB();
     const user = await User.findOne({ email: session.user.email });
+    console.log('User found:', user?.email, 'instagram:', user?.instagram?.isConnected);
 
     if (!user?.instagram?.isConnected || !user.instagram.accessToken) {
       return NextResponse.json({ isConnected: false });
     }
 
-    // Verify token is still valid
-    const res = await fetch(
-      `https://graph.facebook.com/v18.0/${user.instagram.accountId}?fields=id,username,account_type&access_token=${user.instagram.accessToken}`
-    );
-
-    if (!res.ok) {
-      await User.findOneAndUpdate(
-        { email: session.user.email },
-        { $set: { 'instagram.isConnected': false } }
-      );
-      return NextResponse.json({ isConnected: false, error: "Token expired" });
-    }
-
-    const accountInfo = await res.json();
-
     return NextResponse.json({
       isConnected: true,
       account: {
-        id: accountInfo.id,
-        username: accountInfo.username,
-        accountType: accountInfo.account_type,
+        id: user.instagram.accountId,
+        username: user.instagram.username,
+        accountType: user.instagram.accountType,
         connectedAt: user.instagram.connectedAt
       }
     });

@@ -16,10 +16,10 @@ export async function GET() {
     }
 
     const authUrl =
-      `https://www.facebook.com/dialog/oauth?` +
+      `https://www.facebook.com/v18.0/dialog/oauth?` +
       `client_id=${appId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-      `scope=instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_read_engagement,pages_show_list,business_management&` +
+      `scope=instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_read_engagement,pages_show_list&` +
       `response_type=code&` +
       `state=${encodeURIComponent(session.user.email)}`;
 
