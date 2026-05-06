@@ -120,13 +120,13 @@ async function replyToComment(commentId: string, message: string): Promise<boole
 async function sendInstagramDM(userId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
-      "https://graph.instagram.com/v21.0/me/messages",
+      `https://graph.facebook.com/v19.0/${process.env.PAGE_ID}/messages`,
       {
         recipient: { id: userId },
         message: { text: message },
         messaging_type: "RESPONSE",
       },
-      { params: { access_token: INSTAGRAM_ACCESS_TOKEN } }
+      { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
     console.log("Instagram DM sent");
     return true;
