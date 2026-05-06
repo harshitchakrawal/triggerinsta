@@ -27,8 +27,6 @@ export default function CreateAutomation() {
     const urlParams = new URLSearchParams(window.location.search);
     const edit = urlParams.get("edit");
     const prefilledUrl = urlParams.get("reelUrl");
-    const prefilledMediaId = urlParams.get("mediaId");
-    const prefilledCaption = urlParams.get("caption");
 
     if (edit) {
       setEditing(true);
@@ -41,11 +39,6 @@ export default function CreateAutomation() {
         setreplyToComment(rule.replyToComment);
         setreplyToDm(rule.replyToDM);
       });
-    } else if (prefilledMediaId) {
-      // Coming from Instagram page — mediaId already known, skip verification
-      setReelUrl(prefilledUrl || "");
-      setMediaId(prefilledMediaId);
-      setCaption(prefilledCaption || "");
     } else if (prefilledUrl) {
       handleUrlChange(prefilledUrl);
     }

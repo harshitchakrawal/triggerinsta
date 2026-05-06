@@ -332,7 +332,7 @@ export default function MyInstagramPage() {
                           return (
                             <div className="flex items-center gap-2">
                               <Link
-                                href={`/dashboard/create?reelUrl=${encodeURIComponent(post.permalink)}&mediaId=${post.id}&caption=${encodeURIComponent(post.caption || '')}`}
+                                href={`/dashboard/create?reelUrl=${encodeURIComponent(post.permalink)}`}
                                 className={`flex-1 text-center text-[11px] font-bold py-2 rounded-lg transition-all ${
                                   dark ? "bg-white text-[#0F0F0F] hover:bg-white/90" : "bg-[#0F0F0F] text-white hover:opacity-85"
                                 }`}
