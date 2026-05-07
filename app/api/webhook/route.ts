@@ -6,7 +6,7 @@ import { ProcessedComment } from "@/app/models/ProcessedComment";
 
 const VERIFY_TOKEN = "triggerflow123";
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN!;
-const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN!;
+const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN!;  // changed the instagram access token
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
