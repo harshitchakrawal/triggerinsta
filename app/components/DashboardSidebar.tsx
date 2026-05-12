@@ -170,7 +170,7 @@ const DashboardSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {sections.map((section) => (
           <SidebarSection key={section.title} title={section.title} dark={dark}>
             {section.items.map((item) => (

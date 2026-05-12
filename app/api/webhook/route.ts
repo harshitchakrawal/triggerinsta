@@ -1,4 +1,3 @@
-// app/api/webhook/route.ts
 import axios from "axios";
 import { connectDB } from "@/app/lib/mongodb";
 import { AutomationRule } from "@/app/models/AutomationRule";
@@ -6,7 +5,6 @@ import { ProcessedComment } from "@/app/models/ProcessedComment";
 
 const VERIFY_TOKEN = "triggerflow123";
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN!;
-const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN!;  // changed the instagram access token
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -22,9 +20,11 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  console.log("Webhook received:", JSON.stringify(body, null, 2));
+  console.log("[webhook] Received:", JSON.stringify(body, null, 2));
 
+  // Always respond 200 immediately so Meta doesn't retry
   if (body.object !== "instagram") {
+    console.log("[webhook] Not instagram object, skipping");
     return new Response("EVENT_RECEIVED", { status: 200 });
   }
 
@@ -32,6 +32,8 @@ export async function POST(req: Request) {
 
   for (const entry of body.entry ?? []) {
     for (const change of entry.changes ?? []) {
+      console.log("[webhook] Change field:", change.field);
+
       if (change.field !== "comments") continue;
 
       const comment = change.value;
@@ -40,67 +42,90 @@ export async function POST(req: Request) {
       const commenterId = comment.from?.id;
       const commentId = comment.id;
 
-      if (!mediaId || !commentText || !commenterId || !commentId) continue;
+      console.log("[webhook] Comment data:", { mediaId, commentText, commenterId, commentId });
 
-      // Step 1 - find active rule
+      if (!mediaId || !commentText || !commenterId || !commentId) {
+        console.log("[webhook] Missing required fields, skipping");
+        continue;
+      }
+
+      // Step 1 — find active rule for this media
       const rule = await AutomationRule.findOne({ mediaId, isActive: true });
-      if (!rule) continue;
+      if (!rule) {
+        console.log("[webhook] No active rule for mediaId:", mediaId);
+        const allRules = await AutomationRule.find({ isActive: true });
+        console.log("[webhook] Active rule mediaIds in DB:", allRules.map(r => r.mediaId));
+        continue;
+      }
 
-      // Step 2 - keyword check
-      if (!commentText.includes(rule.keyword.toLowerCase())) continue;
+      console.log("[webhook] Rule found:", rule._id, "| keywords:", rule.keyword);
 
-      // Step 3 - dedup check
+      // Step 2 — keyword check (supports comma-separated keywords)
+      const keywords = rule.keyword.split(",").map((k: string) => k.trim().toLowerCase());
+      const matched = keywords.some((kw: string) => commentText.includes(kw));
+      if (!matched) {
+        console.log("[webhook] No keyword match. Comment:", commentText, "| Keywords:", keywords);
+        continue;
+      }
+
+      console.log("[webhook] Keyword matched!");
+
+      // Step 3 — deduplication
       const dedupKey = `${commenterId}:${mediaId}`;
       const already = await ProcessedComment.findOne({ dedupKey });
-      if (already) continue;
+      if (already) {
+        console.log("[webhook] Already replied to this user on this reel, skipping");
+        continue;
+      }
 
-      // Step 4 - send comment reply
+      // Step 4 — send comment reply
       const commentSuccess = await replyToComment(commentId, rule.replyToComment);
 
-      // Step 5 - send DM
+      // Step 5 — send DM
       const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
 
-      // Step 6 - fetch real username and save dedup + update stats ✅ ONLY place stats are updated
+      // Step 6 — fetch username
       let actualUsername = comment.from?.username || comment.from?.name || "unknown";
-      
       try {
         if (actualUsername === "unknown") {
-          // Instagram webhooks usually only send the from.id, so we must fetch the username manually
-          const res = await axios.get(`https://graph.facebook.com/v19.0/${commentId}?fields=from{username}`, {
-            params: { access_token: PAGE_ACCESS_TOKEN }
-          });
-          if (res.data?.from?.username) {
-            actualUsername = res.data.from.username;
-          } else {
-            actualUsername = commenterId; // Fallback to ID if fetch succeeds but username missing
-          }
+          const res = await axios.get(
+            `https://graph.facebook.com/v19.0/${commentId}?fields=from{username}`,
+            { params: { access_token: PAGE_ACCESS_TOKEN } }
+          );
+          actualUsername = res.data?.from?.username || commenterId;
         }
+      } catch {
+        actualUsername = commenterId;
+      }
+
+      // Step 7 — save to DB
+      try {
         await ProcessedComment.create({ dedupKey, ruleId: rule._id, username: actualUsername, commentText });
       } catch (err: any) {
         if (err.code === 11000) {
-          console.log("Duplicate dedupKey, skipping stats update");
-          continue; // ← prevents stats update if dedup already exists
+          console.log("[webhook] Duplicate dedupKey race condition, skipping");
+          continue;
         }
         throw err;
       }
 
+      // Step 8 — update stats
       await AutomationRule.findByIdAndUpdate(rule._id, {
         $inc: {
           triggers: 1,
-          repliesSent: commentSuccess || dmSuccess ? 1 : 0,
+          repliesSent: (commentSuccess || dmSuccess) ? 1 : 0,
         },
         $set: { lastTriggeredAt: new Date() },
       });
 
-      console.log(`Comment reply: ${commentSuccess ? "OK" : "FAILED"}`);
-      console.log(`Instagram DM:  ${dmSuccess ? "OK" : "FAILED (needs approval)"}`);
+      console.log(`[webhook] Comment reply: ${commentSuccess ? "OK" : "FAILED"}`);
+      console.log(`[webhook] Instagram DM:  ${dmSuccess ? "OK" : "FAILED (needs approval)"}`);
     }
   }
 
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
 
-// ✅ Clean - no DB calls here
 async function replyToComment(commentId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
@@ -108,15 +133,14 @@ async function replyToComment(commentId: string, message: string): Promise<boole
       { message },
       { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
-    console.log("Comment reply sent");
+    console.log("[webhook] Comment reply sent");
     return true;
   } catch (err: any) {
-    console.error("Comment reply failed:", err.response?.data ?? err.message);
+    console.error("[webhook] Comment reply failed:", err.response?.data ?? err.message);
     return false;
   }
 }
 
-// ✅ Clean - no DB calls here
 async function sendInstagramDM(userId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
@@ -128,10 +152,10 @@ async function sendInstagramDM(userId: string, message: string): Promise<boolean
       },
       { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
-    console.log("Instagram DM sent");
+    console.log("[webhook] Instagram DM sent");
     return true;
   } catch (err: any) {
-    console.error("Instagram DM failed:", err.response?.data ?? err.message);
+    console.error("[webhook] Instagram DM failed:", err.response?.data ?? err.message);
     return false;
   }
 }

@@ -59,39 +59,6 @@ export default function Workflow() {
             ))}
           </div>
         </div>
-
-        <div className={`mt-20 border rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center gap-8 ${t("bg-white/60 border-[#0F0F0F]/[0.07]", "bg-white/5 border-white/10")}`}>
-          <div className="flex-1">
-            <p className={`text-[10px] font-bold uppercase tracking-[0.15em] mb-2 ${t("text-[#6B6660]", "text-white/40")}`}>Live example</p>
-            <h3 className={`font-serif text-2xl font-normal mb-2 ${t("text-[#0F0F0F]", "text-white")}`}>
-              Comment <em className={`italic ${t("text-[#6B6660]", "text-white/50")}`}>&quot;LINK&quot;</em> → get it in your DMs.
-            </h3>
-            <p className={`text-sm leading-relaxed max-w-md ${t("text-[#6B6660]", "text-white/50")}`}>
-              A creator posts a reel about their free roadmap. They caption it:{" "}
-              <span className={`font-medium ${t("text-[#0F0F0F]", "text-white")}`}>&quot;Comment LINK to get the free PDF.&quot;</span> TriggerFlow handles the rest.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {[
-              { label: "Comment", sub: '"LINK"', icon: <svg key="c" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={dark ? "rgba(255,255,255,0.5)" : "#6B6660"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg> },
-              { label: "Reply", sub: "0.3s", icon: <svg key="r" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={dark ? "rgba(255,255,255,0.5)" : "#6B6660"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg> },
-              { label: "DM sent", sub: "Delivered", icon: <svg key="d" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={dark ? "rgba(255,255,255,0.5)" : "#6B6660"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg> },
-            ].map((item, i) => (
-              <div key={item.label} className="flex items-center gap-3">
-                <div className="flex flex-col items-center gap-1.5 text-center">
-                  <div className={`w-12 h-12 rounded-xl border flex items-center justify-center ${t("bg-[#0F0F0F]/[0.04] border-[#0F0F0F]/[0.07]", "bg-white/5 border-white/10")}`}>{item.icon}</div>
-                  <span className={`text-[10px] font-bold uppercase tracking-wide ${t("text-[#0F0F0F]", "text-white")}`}>{item.label}</span>
-                  <span className={`text-[9px] ${t("text-[#6B6660]", "text-white/40")}`}>{item.sub}</span>
-                </div>
-                {i < 2 && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={dark ? "rgba(255,255,255,0.2)" : "#0F0F0F"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20 flex-shrink-0">
-                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                  </svg>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap'); h2,h3{font-family:'Instrument Serif',serif;}`}</style>
     </section>
