@@ -38,7 +38,7 @@ export async function GET() {
       `limit=50&access_token=${accessToken}`;
 
     while (endpoint) {
-      const res = await fetch(endpoint, { cache: 'no-store' });
+      const res: Response = await fetch(endpoint, { cache: 'no-store' });
 
       if (!res.ok) {
         const error = await res.json();

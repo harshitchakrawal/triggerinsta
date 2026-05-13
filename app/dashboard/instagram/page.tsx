@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useDark } from "@/app/lib/useDark";
-import { HeartIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/outline";
+import { HeartIcon } from "@heroicons/react/24/outline";
 import { ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid } from "@heroicons/react/24/solid";
 
 interface InstagramMedia {
@@ -34,7 +34,7 @@ interface AccountInfo {
   connectedAt?: string;
 }
 
-export default function MyInstagramPage() {
+function MyInstagramPageContent() {
   const { dark } = useDark();
   const searchParams = useSearchParams();
 
@@ -429,5 +429,13 @@ export default function MyInstagramPage() {
       </div>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');`}</style>
     </section>
+  );
+}
+
+export default function MyInstagramPage() {
+  return (
+    <Suspense>
+      <MyInstagramPageContent />
+    </Suspense>
   );
 }
