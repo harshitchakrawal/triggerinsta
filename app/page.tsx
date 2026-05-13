@@ -2,6 +2,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Workflow from "./components/Workflow";
 import Pricing from "./components/Pricing";
+import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <Hero />
       <Workflow />
       <Pricing />
+      <FAQ />
       <Footer />
     </main>
   );

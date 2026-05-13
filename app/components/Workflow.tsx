@@ -1,66 +1,231 @@
 "use client";
+
+import {
+  ArrowRightIcon,
+  BoltIcon,
+  ChartBarIcon,
+  ChatBubbleLeftRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  LinkIcon,
+  ShieldCheckIcon,
+} from "@heroicons/react/24/outline";
 import { useDark } from "@/app/lib/useDark";
 
 const STEPS = [
-  { num: "01", label: "Post", title: "Share your reel", desc: "Upload your Instagram reel, story, or post as you normally would. No changes to your content workflow.", detail: "Works with Reels, Stories & Posts" },
-  { num: "02", label: "Configure", title: "Set your keyword", desc: "In your TriggerFlow dashboard, paste the reel URL and choose a trigger word — like \"LINK\" or \"ROADMAP\".", detail: "Multiple keywords supported" },
-  { num: "03", label: "Engage", title: "Fans comment", desc: "Tell your audience to comment the keyword. They comment, TriggerFlow detects it instantly.", detail: "Real-time detection" },
-  { num: "04", label: "Automate", title: "Replies fire instantly", desc: "TriggerFlow sends a public comment reply and a private DM — all within seconds, automatically.", detail: "< 0.4s average response" },
+  {
+    num: "01",
+    label: "Connect",
+    title: "Choose the post that should convert",
+    desc: "Paste a reel, post, or story URL and TriggerFlow prepares the automation around that exact Instagram asset.",
+    detail: "Reels, posts, and stories",
+    Icon: LinkIcon,
+  },
+  {
+    num: "02",
+    label: "Trigger",
+    title: "Add the keyword and response",
+    desc: "Set words like LINK, PRICE, or GUIDE, then write the public reply and private DM your audience receives.",
+    detail: "Multiple keywords per flow",
+    Icon: ChatBubbleLeftRightIcon,
+  },
+  {
+    num: "03",
+    label: "Listen",
+    title: "Detect comments in real time",
+    desc: "TriggerFlow watches for matching comments, prevents duplicate sends, and keeps the experience clean.",
+    detail: "Built-in deduplication",
+    Icon: BoltIcon,
+  },
+  {
+    num: "04",
+    label: "Measure",
+    title: "Track every reply and DM",
+    desc: "See trigger volume, delivered messages, active automations, and which content is turning comments into action.",
+    detail: "Creator-ready analytics",
+    Icon: ChartBarIcon,
+  },
+];
+
+const SIGNALS = [
+  { label: "Avg. response", value: "0.4s", Icon: ClockIcon },
+  { label: "Duplicate control", value: "On", Icon: ShieldCheckIcon },
+  { label: "Flow status", value: "Live", Icon: CheckCircleIcon },
 ];
 
 export default function Workflow() {
   const { dark, mounted } = useDark();
-  const t = (light: string, d: string) => dark ? d : light;
+  const t = (light: string, d: string) => (dark ? d : light);
 
   return (
-    <section id="how-it-works" className="relative py-32 px-4 sm:px-8 bg-[#F4F1EB]">
+    <section
+      id="how-it-works"
+      className={`relative overflow-hidden px-4 py-28 sm:px-8 sm:py-32 ${t(
+        "bg-[#F4F1EB]",
+        "bg-[#0a0e1a]"
+      )}`}
+    >
       {mounted && dark && <div className="absolute inset-0 bg-[#0a0e1a]/60 pointer-events-none z-0" />}
-      <div className="relative z-10 max-w-6xl mx-auto">
 
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-20">
-          <div>
-            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-3 ${t("text-[#6B6660]", "text-white/40")}`}>How it works</p>
-            <h2 className={`font-serif text-[clamp(2rem,5vw,3.5rem)] font-normal leading-[1.1] tracking-tight ${t("text-[#0F0F0F]", "text-white")}`}>
-              From post to DM<br />
-              <em className={`italic ${t("text-[#6B6660]", "text-white/50")}`}>in four steps.</em>
-            </h2>
-          </div>
-          <p className={`text-sm max-w-xs leading-relaxed sm:text-right ${t("text-[#6B6660]", "text-white/50")}`}>
-            No code. No manual replies. Just set it up once and let TriggerFlow handle the rest.
+      <div className="relative z-10 mx-auto grid max-w-6xl gap-14 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+        <div className="lg:sticky lg:top-24">
+          <p
+            className={`mb-4 text-[10px] font-bold uppercase tracking-[0.18em] ${t(
+              "text-[#6B6660]",
+              "text-white/45"
+            )}`}
+          >
+            How it works
           </p>
-        </div>
+          <h2
+            className={`font-serif text-[clamp(2.25rem,5vw,4.2rem)] font-bold leading-[1.02] tracking-tight ${t(
+              "text-[#0F0F0F]",
+              "text-white"
+            )}`}
+          >
+            Build a comment-to-DM flow in minutes.
+          </h2>
+          <p
+            className={`mt-5 max-w-xl text-base leading-7 sm:text-lg ${t(
+              "text-[#6B6660]",
+              "text-white/55"
+            )}`}
+          >
+            Connect a post, define the trigger, and let TriggerFlow turn high-intent comments into instant replies,
+            DMs, and measurable follow-up.
+          </p>
 
-        <div className="relative">
-          <div className={`hidden sm:block absolute top-8 left-[calc(12.5%-1px)] right-[calc(12.5%-1px)] h-px ${t("bg-[#0F0F0F]/[0.08]", "bg-white/10")}`} />
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-8 sm:gap-6">
-            {STEPS.map((step, i) => (
-              <div key={step.num} className="relative flex flex-col gap-5">
-                <div className={`relative z-10 w-16 h-16 rounded-full border flex items-center justify-center flex-shrink-0 ${t("bg-[#F4F1EB] border-[#0F0F0F]/[0.1]", "bg-white/5 border-white/10")}`}>
-                  <span className={`font-serif text-xl font-normal ${t("text-[#0F0F0F]/30", "text-white/30")}`}>{step.num}</span>
-                </div>
-                <div>
-                  <span className={`text-[9px] font-bold uppercase tracking-[0.15em] block mb-1 ${t("text-[#6B6660]", "text-white/40")}`}>{step.label}</span>
-                  <h3 className={`font-serif text-lg font-normal mb-2 ${t("text-[#0F0F0F]", "text-white")}`}>{step.title}</h3>
-                  <p className={`text-sm leading-relaxed mb-3 ${t("text-[#6B6660]", "text-white/50")}`}>{step.desc}</p>
-                  <span className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-full border ${t("text-[#0F0F0F]/50 bg-[#0F0F0F]/[0.04] border-[#0F0F0F]/[0.07]", "text-white/40 bg-white/5 border-white/10")}`}>
-                    <span className={`w-1 h-1 rounded-full inline-block ${t("bg-[#0F0F0F]/30", "bg-white/30")}`} />
-                    {step.detail}
-                  </span>
-                </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`sm:hidden flex items-center gap-2 ${t("text-[#0F0F0F]/20", "text-white/20")}`}>
-                    <div className={`flex-1 h-px ${t("bg-[#0F0F0F]/[0.08]", "bg-white/10")}`} />
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
-                )}
+          <div className="mt-8 grid grid-cols-3 gap-3">
+            {SIGNALS.map(({ label, value, Icon }) => (
+              <div
+                key={label}
+                className={`rounded-lg border p-3 ${t(
+                  "border-[#0F0F0F]/[0.08] bg-white/45",
+                  "border-white/[0.08] bg-white/[0.04]"
+                )}`}
+              >
+                <Icon className={`mb-3 h-4 w-4 ${t("text-[#0F0F0F]/45", "text-white/45")}`} />
+                <p className={`text-lg font-semibold leading-none ${t("text-[#0F0F0F]", "text-white")}`}>{value}</p>
+                <p className={`mt-1 text-[10px] leading-4 ${t("text-[#6B6660]", "text-white/40")}`}>{label}</p>
               </div>
             ))}
           </div>
         </div>
+
+        <div className="space-y-5">
+          <div
+            className={`rounded-lg border p-4 shadow-[0_24px_80px_rgba(15,15,15,0.08)] sm:p-5 ${t(
+              "border-[#0F0F0F]/[0.08] bg-[#FBFAF7]",
+              "border-white/[0.1] bg-white/[0.05]"
+            )}`}
+          >
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className={`text-sm font-semibold ${t("text-[#0F0F0F]", "text-white")}`}>Launch giveaway flow</p>
+                <p className={`mt-1 text-xs ${t("text-[#6B6660]", "text-white/40")}`}>Reel: Summer launch teaser</p>
+              </div>
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${t(
+                  "border-emerald-600/15 bg-emerald-600/10 text-emerald-700",
+                  "border-emerald-300/15 bg-emerald-300/10 text-emerald-200"
+                )}`}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live
+              </span>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-stretch">
+              <div
+                className={`rounded-lg border p-4 ${t(
+                  "border-[#0F0F0F]/[0.08] bg-[#F4F1EB]",
+                  "border-white/[0.08] bg-black/10"
+                )}`}
+              >
+                <p className={`text-[10px] font-bold uppercase tracking-[0.16em] ${t("text-[#6B6660]", "text-white/35")}`}>
+                  Incoming comment
+                </p>
+                <div className="mt-4 flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[#FF7A59] via-[#E83E8C] to-[#7C3AED]" />
+                  <div className="min-w-0">
+                    <p className={`text-sm font-medium ${t("text-[#0F0F0F]", "text-white")}`}>@maya.creates</p>
+                    <p className={`mt-1 text-sm leading-6 ${t("text-[#6B6660]", "text-white/55")}`}>
+                      This looks useful. Send me the <span className={t("text-[#0F0F0F]", "text-white")}>LINK</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`hidden items-center px-1 sm:flex ${t("text-[#0F0F0F]/25", "text-white/25")}`}>
+                <ArrowRightIcon className="h-5 w-5" />
+              </div>
+
+              <div
+                className={`rounded-lg border p-4 ${t(
+                  "border-[#0F0F0F]/[0.08] bg-[#F4F1EB]",
+                  "border-white/[0.08] bg-black/10"
+                )}`}
+              >
+                <p className={`text-[10px] font-bold uppercase tracking-[0.16em] ${t("text-[#6B6660]", "text-white/35")}`}>
+                  Automated output
+                </p>
+                <div className="mt-4 space-y-3">
+                  <div className={`rounded-md p-3 ${t("bg-white/70", "bg-white/[0.06]")}`}>
+                    <p className={`text-xs font-semibold ${t("text-[#0F0F0F]", "text-white")}`}>Public reply</p>
+                    <p className={`mt-1 text-sm ${t("text-[#6B6660]", "text-white/55")}`}>Sent. Check your inbox.</p>
+                  </div>
+                  <div className={`rounded-md p-3 ${t("bg-white/70", "bg-white/[0.06]")}`}>
+                    <p className={`text-xs font-semibold ${t("text-[#0F0F0F]", "text-white")}`}>Private DM</p>
+                    <p className={`mt-1 text-sm ${t("text-[#6B6660]", "text-white/55")}`}>
+                      Here is the launch link and bonus guide.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {STEPS.map(({ num, label, title, desc, detail, Icon }) => (
+              <article
+                key={num}
+                className={`group rounded-lg border p-5 transition-all duration-300 hover:-translate-y-0.5 ${t(
+                  "border-[#0F0F0F]/[0.08] bg-white/40 hover:border-[#0F0F0F]/[0.14] hover:bg-white/65",
+                  "border-white/[0.08] bg-white/[0.035] hover:border-white/[0.16] hover:bg-white/[0.06]"
+                )}`}
+              >
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg border ${t(
+                      "border-[#0F0F0F]/[0.08] bg-[#F4F1EB]",
+                      "border-white/[0.08] bg-white/[0.06]"
+                    )}`}
+                  >
+                    <Icon className={`h-5 w-5 ${t("text-[#0F0F0F]/60", "text-white/60")}`} />
+                  </div>
+                  <span className={`font-serif text-2xl ${t("text-[#0F0F0F]/[0.18]", "text-white/[0.18]")}`}>{num}</span>
+                </div>
+                <p className={`text-[10px] font-bold uppercase tracking-[0.16em] ${t("text-[#6B6660]", "text-white/35")}`}>
+                  {label}
+                </p>
+                <h3 className={`mt-2 text-lg font-semibold leading-6 ${t("text-[#0F0F0F]", "text-white")}`}>{title}</h3>
+                <p className={`mt-3 text-sm leading-6 ${t("text-[#6B6660]", "text-white/50")}`}>{desc}</p>
+                <div
+                  className={`mt-5 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[10px] font-medium ${t(
+                    "border-[#0F0F0F]/[0.08] bg-[#0F0F0F]/[0.03] text-[#0F0F0F]/55",
+                    "border-white/[0.08] bg-white/[0.04] text-white/45"
+                  )}`}
+                >
+                  <span className={`h-1 w-1 rounded-full ${t("bg-[#0F0F0F]/35", "bg-white/35")}`} />
+                  {detail}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
       </div>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap'); h2,h3{font-family:'Instrument Serif',serif;}`}</style>
+
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap'); h2,.font-serif{font-family:'Instrument Serif',serif;}`}</style>
     </section>
   );
 }
