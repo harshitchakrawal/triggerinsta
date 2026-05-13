@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { backendUrl } from "@/app/lib/backend";
 
 export default function CreateAutomation() {
   // --- CREATE mode state (only used when creating a new automation) ---
@@ -31,7 +32,7 @@ export default function CreateAutomation() {
     if (edit) {
       setEditing(true);
       setEditId(edit);
-      fetch("/api/rules?edit=" + edit).then(r => r.json()).then(data => {
+      fetch(backendUrl("/rules?edit=" + edit)).then(r => r.json()).then(data => {
         const rule = data.rule;
         const fetched = { mediaId: rule.mediaId, reelUrl: rule.reelUrl || "", caption: rule.caption || "" };
         setDbData(fetched);
@@ -50,7 +51,7 @@ export default function CreateAutomation() {
     if (!match) return;
     setVerifying(true);
     try {
-      const res = await fetch("/api/media/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
+      const res = await fetch(backendUrl("/media/verify"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
       const data = await res.json();
       if (data.success) { setMediaId(data.mediaId); setCaption(data.caption || ""); }
       else { setVerifyError(data.error); setMediaId(""); setCaption(""); }
@@ -67,7 +68,7 @@ export default function CreateAutomation() {
       const body = editing
         ? { id: editId, mediaId: dbData?.mediaId, reelUrl: dbData?.reelUrl, caption: dbData?.caption, keyword: keywords.join(","), replyToComment, replyToDm }
         : { mediaId, reelUrl, caption, keyword: keywords.join(","), replyToComment, replyToDm };
-      const res = await fetch("/api/rules", { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await fetch(backendUrl("/rules"), { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); if (editing) window.location.href = "/dashboard/automations"; }
       else alert("Failed to save automation. Please try again.");
     } catch (error) { console.error("Save error:", error); alert("An error occurred while saving."); }

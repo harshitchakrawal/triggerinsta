@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { backendUrl } from "@/app/lib/backend";
 
 interface Automation {
   _id: string;
@@ -84,7 +85,7 @@ function AutomationCard({ automation, onToggle, onEdit, onPauseResume, onDelete 
       <div className="flex items-start gap-3.5">
         <div className="w-20 h-20 rounded-xl bg-[#0F0F0F]/[0.04] border border-[#0F0F0F]/[0.07] flex items-center justify-center flex-shrink-0 overflow-hidden">
           {automation.mediaId ? (
-            <img src={`/api/proxy-image?mediaId=${encodeURIComponent(automation.mediaId)}`} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <img src={backendUrl(`/proxy-image?mediaId=${encodeURIComponent(automation.mediaId)}`)} alt="Thumbnail" className="w-full h-full object-cover rounded-xl" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(15,15,15,0.15)" stroke="#6B6660" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polygon points="5 3 19 12 5 21 5 3" />
@@ -149,17 +150,17 @@ export default function AutomationsPage() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/rules").then((r) => r.json()).then((data) => setAutomations(data.rules || [])).finally(() => setLoading(false));
+    fetch(backendUrl("/rules")).then((r) => r.json()).then((data) => setAutomations(data.rules || [])).finally(() => setLoading(false));
   }, []);
 
   const handleToggle = async (id: string) => {
-    await fetch("/api/rules", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    await fetch(backendUrl("/rules"), { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setAutomations((prev) => prev.map((a) => a._id === id ? { ...a, isActive: !a.isActive } : a));
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this automation?")) return;
-    await fetch("/api/rules", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    await fetch(backendUrl("/rules"), { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     setAutomations((prev) => prev.filter((a) => a._id !== id));
   };
 

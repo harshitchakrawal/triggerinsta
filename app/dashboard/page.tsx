@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { ReelCard } from "@/app/components/ReelCard";
 import { useDark } from "@/app/lib/useDark";
+import { backendUrl } from "@/app/lib/backend";
 
 const StatCard = ({
   label,
@@ -82,7 +83,7 @@ export default function Dashboard() {
   React.useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch('/api/dashboard');
+        const response = await fetch(backendUrl("/dashboard"));
         if (response.ok) {
           const dashboardData = await response.json();
           setData(dashboardData);
