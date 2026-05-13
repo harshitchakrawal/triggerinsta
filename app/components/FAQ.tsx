@@ -27,22 +27,7 @@ const FAQS = [
     q: "Will the same person get multiple DMs if they comment more than once?",
     a: "No. TriggerFlow has built-in deduplication — once a user has been replied to on a specific post, they won't receive another automated reply or DM for the same post, no matter how many times they comment.",
   },
-  {
-    q: "Can I run automations on multiple posts or reels at the same time?",
-    a: "Yes, each automation rule is linked to one post or reel. You can create multiple rules — one per post — up to the limit of your plan (1 on Free, 5 on Essential, unlimited on Pro & Advanced).",
-  },
-  {
-    q: "Is there a free trial for paid plans?",
-    a: "The Free plan lets you try TriggerFlow with 9 triggers at no cost and no credit card required. Paid plans do not currently include a separate trial period, but you can cancel anytime and won't be charged after cancellation.",
-  },
-  {
-    q: "How does annual billing work and how much do I save?",
-    a: "When you choose annual billing you're charged once per year at a reduced rate — roughly 33% less than paying month-to-month. For example, Pro drops from $19/mo to $13/mo billed annually.",
-  },
-  {
-    q: "Can I upgrade or downgrade my plan at any time?",
-    a: "Yes. You can upgrade immediately and the new plan takes effect right away. Downgrades take effect at the end of your current billing cycle so you keep access to your current features until then.",
-  },
+ 
 ];
 
 export default function FAQ() {
