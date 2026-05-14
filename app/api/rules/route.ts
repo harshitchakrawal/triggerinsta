@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/app/lib/mongodb";
 import { AutomationRule } from "@/app/models/AutomationRule";
+import { ProcessedComment } from "@/app/models/ProcessedComment";
 
 async function fetchMediaDetails(mediaId: string) {
   const accessToken = process.env.PAGE_ACCESS_TOKEN;
@@ -164,6 +165,7 @@ export async function DELETE(req: Request) {
     await connectDB();
     const { id } = await req.json();
     await AutomationRule.findByIdAndDelete(id);
+    await ProcessedComment.deleteMany({ ruleId: id });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[DELETE /api/rules]", err);

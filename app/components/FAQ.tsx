@@ -12,18 +12,6 @@ const FAQS = [
     a: "Yes. TriggerFlow uses the Instagram Graph API which requires either a Professional (Business or Creator) Instagram account connected to a Facebook Page. Personal accounts are not supported by Meta's API.",
   },
   {
-    q: "What counts as a trigger?",
-    a: "A trigger is counted each time TriggerFlow detects a matching keyword comment and fires an automated reply or DM. On the Free plan you get 9 triggers total. Essential gives you 500 per month, and Pro & Advanced offer unlimited triggers.",
-  },
-  {
-    q: "What is the difference between Comment Reply and DM Reply?",
-    a: "A Comment Reply is a public response posted under the original comment on your post. A DM Reply is a private message sent directly to the commenter's Instagram inbox. Free and Essential plans include comment replies; DM replies are available on Pro and above.",
-  },
-  {
-    q: "Can I set multiple keywords for one automation?",
-    a: "Yes. You can enter comma-separated keywords (e.g. \"link, price, info\") and TriggerFlow will trigger if a comment contains any one of them.",
-  },
-  {
     q: "Will the same person get multiple DMs if they comment more than once?",
     a: "No. TriggerFlow has built-in deduplication — once a user has been replied to on a specific post, they won't receive another automated reply or DM for the same post, no matter how many times they comment.",
   },
@@ -35,17 +23,17 @@ const FAQS = [
     q: "Is there a free trial for paid plans?",
     a: "The Free plan lets you try TriggerFlow with 9 triggers at no cost and no credit card required. Paid plans do not currently include a separate trial period, but you can cancel anytime and won't be charged after cancellation.",
   },
-  
 ];
 
 export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
-  const { dark } = useDark();
+  const { dark, mounted } = useDark();
   const t = (light: string, d: string) => dark ? d : light;
 
   return (
-    <section className={`px-4 sm:px-8 py-32 border-t ${t("bg-[#F4F1EB] border-[#0F0F0F]/[0.07]", "bg-[#0a0e1a] border-white/[0.07]")}`}>
-      <div className="max-w-3xl mx-auto">
+    <section id="faq" className={`relative overflow-hidden px-4 py-28 sm:px-8 sm:py-32 ${t("bg-[#F4F1EB]","bg-[#0a0e1a]")}`}>
+      {mounted && dark && <div className="absolute inset-0 bg-[#0a0e1a]/60 pointer-events-none z-0" />}
+      <div className="relative z-10 max-w-3xl mx-auto">
 
         <div className="text-center mb-12">
           <p className={`font-serif text-[clamp(2rem,5vw,3.5rem)] font-bold leading-[1] tracking-tight mb-2 ${t("text-[#0F0F0F]", "text-white")}`}>
@@ -63,25 +51,19 @@ export default function FAQ() {
                 onClick={() => setOpen(open === i ? null : i)}
                 className="w-full flex items-center justify-between gap-4 text-left group cursor-pointer"
               >
-                <span className={`text-md font-medium transition-colors duration-200 ${
+                <span className={`text-lg font-medium transition-colors duration-200 ${
                   open === i
                     ? t("text-[#0F0F0F]", "text-white")
                     : t("text-[#0F0F0F] group-hover:text-[#0F0F0F]", "text-white/50 group-hover:text-white")
                 }`}>
                   {faq.q}
                 </span>
-                <span className={`shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all duration-200 ${
-                  open === i
-                    ? t("border-[#0F0F0F]/30 bg-[#0F0F0F]/8", "border-white/30 bg-white/10")
-                    : t("border-[#0F0F0F]/15 group-hover:border-[#0F0F0F]/30", "border-white/15 group-hover:border-white/30")
-                }`}>
+                <span className={`shrink-0 w-8 h-8 flex items-center justify-center transition-transform duration-200 ${open === i ? "rotate-180" : ""} hover:scale-105`}>
                   <svg
-                    width="10" height="10" viewBox="0 0 10 10" fill="none"
-                    className={`transition-transform duration-200 ${open === i ? "rotate-45" : ""}`}
-                    stroke={dark ? "rgba(255,255,255,0.5)" : "rgba(15,15,15,0.5)"} strokeWidth="1.5" strokeLinecap="round"
+                    width="16" height="16" viewBox="0 0 12 12" fill="none"
+                    stroke={dark ? "rgba(255,255,255,0.8)" : "rgba(15,15,15,0.8)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                   >
-                    <line x1="5" y1="1" x2="5" y2="9" />
-                    <line x1="1" y1="5" x2="9" y2="5" />
+                    <path d="M2 4.5 L6 8.5 L10 4.5" />
                   </svg>
                 </span>
               </button>
