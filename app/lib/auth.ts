@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { connectDB } from "@/app/lib/mongodb";
-import { User } from "@/app/models/User";
+import Credentials from "next-auth/providers/credentials";
+import { prisma } from "@/app/lib/prisma";
 
 export const {
   handlers: { GET, POST },
@@ -13,30 +13,15 @@ export const {
   cookies: {
     pkceCodeVerifier: {
       name: "next-auth.pkce.code_verifier",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: true,
-      },
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
     },
     state: {
       name: "next-auth.state",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: true,
-      },
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
     },
     sessionToken: {
       name: "next-auth.session-token",
-      options: {
-        httpOnly: true,
-        sameSite: "none",
-        path: "/",
-        secure: true,
-      },
+      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
     },
   },
   providers: [
@@ -45,33 +30,48 @@ export const {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       checks: ["state"],
     }),
+    Credentials({
+      id: "instagram",
+      name: "Instagram",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        name: { label: "Name", type: "text" },
+        image: { label: "Image", type: "text" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email) return null;
+        const user = await prisma.user.upsert({
+          where: { email: credentials.email as string },
+          update: {},
+          create: {
+            email: credentials.email as string,
+            name: (credentials.name as string) || null,
+            image: (credentials.image as string) || null,
+          },
+        });
+        return { id: user.id, email: user.email, name: user.name, image: user.image };
+      },
+    }),
   ],
-  pages: {
-    signIn: "/login",
-  },
+  session: { strategy: "jwt" },
+  pages: { signIn: "/login" },
   callbacks: {
-    async signIn({ user }) {
-      try {
-        await connectDB();
-        const existing = await User.findOne({ email: user.email });
-        if (!existing) {
-          await User.create({
-            name: user.name,
-            email: user.email,
-            image: user.image,
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        try {
+          await prisma.user.upsert({
+            where: { email: user.email! },
+            update: {},
+            create: { name: user.name, email: user.email!, image: user.image },
           });
-          console.log("[auth] New user created:", user.email);
+        } catch (err) {
+          console.error("[auth] signIn error:", err);
         }
-        return true;
-      } catch (err) {
-        console.error("[auth] signIn error:", err);
-        return true; // still allow login even if DB save fails
       }
+      return true;
     },
     async session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-      }
+      if (session.user && token.sub) session.user.id = token.sub;
       return session;
     },
   },

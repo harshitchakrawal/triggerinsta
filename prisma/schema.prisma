@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  name                  String?
+  email                 String    @unique
+  image                 String?
+  createdAt             DateTime  @default(now())
+  instagramConnected    Boolean   @default(false)
+  instagramAccessToken  String?
+  instagramAccountId    String?
+  instagramUsername     String?
+  instagramAccountType  String?
+  instagramConnectedAt  DateTime?
+}
+
+model AutomationRule {
+  id               String             @id @default(cuid())
+  mediaId          String             @unique
+  reelUrl          String?
+  thumbnailUrl     String?
+  caption          String?
+  keyword          String
+  replyToComment   String
+  replyToDM        String
+  isActive         Boolean            @default(true)
+  triggers         Int                @default(0)
+  repliesSent      Int                @default(0)
+  lastTriggeredAt  DateTime?
+  createdAt        DateTime           @default(now())
+  processedComments ProcessedComment[]
+}
+
+model ProcessedComment {
+  id          String         @id @default(cuid())
+  dedupKey    String         @unique
+  ruleId      String
+  rule        AutomationRule @relation(fields: [ruleId], references: [id])
+  username    String?        @default("unknown_user")
+  commentText String?        @default("")
+  createdAt   DateTime       @default(now())
+}
