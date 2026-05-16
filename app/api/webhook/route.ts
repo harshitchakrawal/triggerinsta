@@ -1,12 +1,8 @@
-// app/api/webhook/route.ts
 import axios from "axios";
-import { connectDB } from "@/app/lib/mongodb";
-import { AutomationRule } from "@/app/models/AutomationRule";
-import { ProcessedComment } from "@/app/models/ProcessedComment";
+import { prisma } from "@/app/lib/prisma";
 
 const VERIFY_TOKEN = "triggerflow123";
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN!;
-const INSTAGRAM_ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN!;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -28,8 +24,6 @@ export async function POST(req: Request) {
     return new Response("EVENT_RECEIVED", { status: 200 });
   }
 
-  await connectDB();
-
   for (const entry of body.entry ?? []) {
     for (const change of entry.changes ?? []) {
       if (change.field !== "comments") continue;
@@ -43,7 +37,7 @@ export async function POST(req: Request) {
       if (!mediaId || !commentText || !commenterId || !commentId) continue;
 
       // Step 1 - find active rule
-      const rule = await AutomationRule.findOne({ mediaId, isActive: true });
+      const rule = await prisma.automationRule.findFirst({ where: { mediaId, isActive: true } });
       if (!rule) continue;
 
       // Step 2 - keyword check
@@ -51,7 +45,7 @@ export async function POST(req: Request) {
 
       // Step 3 - dedup check
       const dedupKey = `${commenterId}:${mediaId}`;
-      const already = await ProcessedComment.findOne({ dedupKey });
+      const already = await prisma.processedComment.findUnique({ where: { dedupKey } });
       if (already) continue;
 
       // Step 4 - send comment reply
@@ -60,36 +54,39 @@ export async function POST(req: Request) {
       // Step 5 - send DM
       const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
 
-      // Step 6 - fetch real username and save dedup + update stats ✅ ONLY place stats are updated
+      // Step 6 - fetch username and save dedup + update stats
       let actualUsername = comment.from?.username || comment.from?.name || "unknown";
-      
+
       try {
         if (actualUsername === "unknown") {
-          // Instagram webhooks usually only send the from.id, so we must fetch the username manually
           const res = await axios.get(`https://graph.facebook.com/v19.0/${commentId}?fields=from{username}`, {
-            params: { access_token: PAGE_ACCESS_TOKEN }
+            params: { access_token: PAGE_ACCESS_TOKEN },
           });
           if (res.data?.from?.username) {
             actualUsername = res.data.from.username;
           } else {
-            actualUsername = commenterId; // Fallback to ID if fetch succeeds but username missing
+            actualUsername = commenterId;
           }
         }
-        await ProcessedComment.create({ dedupKey, ruleId: rule._id, username: actualUsername, commentText });
+
+        await prisma.processedComment.create({
+          data: { dedupKey, ruleId: rule.id, username: actualUsername, commentText },
+        });
       } catch (err: any) {
-        if (err.code === 11000) {
+        if (err.code === "P2002") {
           console.log("Duplicate dedupKey, skipping stats update");
-          continue; // ← prevents stats update if dedup already exists
+          continue;
         }
         throw err;
       }
 
-      await AutomationRule.findByIdAndUpdate(rule._id, {
-        $inc: {
-          triggers: 1,
-          repliesSent: commentSuccess || dmSuccess ? 1 : 0,
+      await prisma.automationRule.update({
+        where: { id: rule.id },
+        data: {
+          triggers: { increment: 1 },
+          repliesSent: { increment: commentSuccess || dmSuccess ? 1 : 0 },
+          lastTriggeredAt: new Date(),
         },
-        $set: { lastTriggeredAt: new Date() },
       });
 
       console.log(`Comment reply: ${commentSuccess ? "OK" : "FAILED"}`);
@@ -100,7 +97,6 @@ export async function POST(req: Request) {
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
 
-// ✅ Clean - no DB calls here
 async function replyToComment(commentId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
@@ -108,7 +104,6 @@ async function replyToComment(commentId: string, message: string): Promise<boole
       { message },
       { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
-    console.log("Comment reply sent");
     return true;
   } catch (err: any) {
     console.error("Comment reply failed:", err.response?.data ?? err.message);
@@ -116,19 +111,13 @@ async function replyToComment(commentId: string, message: string): Promise<boole
   }
 }
 
-// ✅ Clean - no DB calls here
 async function sendInstagramDM(userId: string, message: string): Promise<boolean> {
   try {
     await axios.post(
-      "https://graph.instagram.com/v21.0/me/messages",
-      {
-        recipient: { id: userId },
-        message: { text: message },
-        messaging_type: "RESPONSE",
-      },
-      { params: { access_token: INSTAGRAM_ACCESS_TOKEN } }
+      `https://graph.facebook.com/v19.0/${process.env.PAGE_ID}/messages`,
+      { recipient: { id: userId }, message: { text: message }, messaging_type: "RESPONSE" },
+      { params: { access_token: PAGE_ACCESS_TOKEN } }
     );
-    console.log("Instagram DM sent");
     return true;
   } catch (err: any) {
     console.error("Instagram DM failed:", err.response?.data ?? err.message);

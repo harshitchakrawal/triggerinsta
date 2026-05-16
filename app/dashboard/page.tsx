@@ -177,7 +177,7 @@ export default function Dashboard() {
                   {data.topActiveReels.length > 0 ? (
                     data.topActiveReels.map((rule: any) => (
                       <ReelCard
-                        key={rule._id?.toString() || rule.mediaId}
+                        key={rule.id || rule._id?.toString() || rule.mediaId}
                         title={rule.reelUrl || rule.mediaId || "Reel"}
                         keyword={rule.keyword}
                         triggers={rule.triggers || 0}

@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface Automation {
-  _id: string;
+  id: string;
+  _id?: string;
   mediaId: string;
   reelUrl?: string;
   thumbnailUrl?: string;
@@ -99,13 +100,13 @@ function AutomationCard({ automation, onToggle, onEdit, onPauseResume, onDelete 
             </h3>
             <div className="flex items-center gap-2.5">
               <StatusBadge active={automation.isActive} />
-              <Toggle active={automation.isActive} onToggle={() => onToggle(automation._id)} />
+              <Toggle active={automation.isActive} onToggle={() => onToggle(automation.id || automation._id!)} />
             </div>
           </div>
           <p className="m-0 text-xs text-[#6B6660] font-medium">{automation.mediaId} · Added {addedDate}</p>
           <div className="flex gap-1.5 mt-2 flex-wrap">
-            {keywords.map((kw) => (
-              <span key={kw} className="text-[10px] font-medium px-2.5 py-1 rounded-sm border border-[#0F0F0F]/10 text-[#6B6660] bg-[#0F0F0F]/[0.04]">{kw}</span>
+            {keywords.map((kw, i) => (
+              <span key={`${kw}-${i}`} className="text-[10px] font-medium px-2.5 py-1 rounded-sm border border-[#0F0F0F]/10 text-[#6B6660] bg-[#0F0F0F]/[0.04]">{kw}</span>
             ))}
           </div>
         </div>
@@ -122,9 +123,9 @@ function AutomationCard({ automation, onToggle, onEdit, onPauseResume, onDelete 
           <Stat label="Last trigger" value={lastTrigger} />
         </div>
         <div className="flex gap-2">
-          <ActionBtn label="Edit" onClick={() => onEdit(automation._id)} />
-          <ActionBtn label={automation.isActive ? "Pause" : "Resume"} onClick={() => onPauseResume(automation._id)} />
-          <ActionBtn label="Delete" onClick={() => onDelete(automation._id)} danger />
+          <ActionBtn label="Edit" onClick={() => onEdit(automation.id || automation._id!)} />
+          <ActionBtn label={automation.isActive ? "Pause" : "Resume"} onClick={() => onPauseResume(automation.id || automation._id!)} />
+          <ActionBtn label="Delete" onClick={() => onDelete(automation.id || automation._id!)} danger />
         </div>
       </div>
     </div>
@@ -154,13 +155,13 @@ export default function AutomationsPage() {
 
   const handleToggle = async (id: string) => {
     await fetch("/api/rules", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    setAutomations((prev) => prev.map((a) => a._id === id ? { ...a, isActive: !a.isActive } : a));
+    setAutomations((prev) => prev.map((a) => (a.id || a._id) === id ? { ...a, isActive: !a.isActive } : a));
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this automation?")) return;
     await fetch("/api/rules", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
-    setAutomations((prev) => prev.filter((a) => a._id !== id));
+    setAutomations((prev) => prev.filter((a) => (a.id || a._id) !== id));
   };
 
   const handleEdit = (id: string) => { window.location.href = `/dashboard/create?edit=${id}`; };
@@ -206,7 +207,7 @@ export default function AutomationsPage() {
         ) : (
           <div className="flex flex-col gap-3.5">
             {filtered.length === 0 ? <EmptyState filter={filter} /> : filtered.map((a) => (
-              <AutomationCard key={a._id} automation={a} onToggle={handleToggle} onEdit={handleEdit} onPauseResume={handleToggle} onDelete={handleDelete} />
+              <AutomationCard key={a.id || a._id} automation={a} onToggle={handleToggle} onEdit={handleEdit} onPauseResume={handleToggle} onDelete={handleDelete} />
             ))}
           </div>
         )}
