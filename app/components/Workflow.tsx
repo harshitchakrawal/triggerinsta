@@ -175,8 +175,8 @@ export default function Workflow() {
               <article
                 key={num}
                 className={`group flex flex-col rounded-lg border p-6 transition-all duration-300 hover:-translate-y-0.5 ${t(
-                  "border-white/[0.08] bg-[#0F0F0F] hover:border-white/[0.16] hover:bg-[#111111]",
-                  "border-[#0F0F0F]/[0.08] bg-white/40 hover:border-[#0F0F0F]/[0.14] hover:bg-white/65"
+                  "border-[#0F0F0F]/[0.08] bg-[#0F0F0F] hover:border-[#0F0F0F]/[0.14] hover:bg-[#111111]",
+                  "border-white/[0.08] bg-white hover:border-white/[0.14] hover:bg-white/95"
                 )}`}
               >
                 <div className="mb-2 flex items-center gap-3">

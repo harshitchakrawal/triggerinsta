@@ -1,109 +1,109 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/app/lib/mongodb";
-import { User } from "@/app/models/User";
+import { prisma } from "@/app/lib/prisma";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
-    const error = searchParams.get('error');
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+    const error = searchParams.get("error");
 
-    if (error) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=access_denied', 'http://localhost:3000'));
-    }
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-    if (!code || !state) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=invalid_request', 'http://localhost:3000'));
-    }
+    if (error) return NextResponse.redirect(new URL("/login?error=access_denied", baseUrl));
+    if (!code || !state) return NextResponse.redirect(new URL("/login?error=invalid_request", baseUrl));
 
     const appId = process.env.FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
     const redirectUri = process.env.INSTAGRAM_REDIRECT_URI;
 
-    if (!appId || !appSecret || !redirectUri) {
-      throw new Error("Instagram OAuth credentials not configured");
-    }
+    if (!appId || !appSecret || !redirectUri) throw new Error("Instagram OAuth credentials not configured");
 
     // Step 1: Exchange code for access token
-    const tokenResponse = await fetch('https://graph.facebook.com/v18.0/oauth/access_token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        client_id: appId,
-        client_secret: appSecret,
-        redirect_uri: redirectUri,
-        code: code,
-      }),
+    const tokenResponse = await fetch("https://graph.facebook.com/v18.0/oauth/access_token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ client_id: appId, client_secret: appSecret, redirect_uri: redirectUri, code }),
     });
-
     const tokenData = await tokenResponse.json();
-    console.log('Token response:', tokenData);
-
-    if (!tokenResponse.ok || tokenData.error) {
-      throw new Error(`Token exchange failed: ${tokenData.error?.message || 'Unknown error'}`);
-    }
+    if (!tokenResponse.ok || tokenData.error) throw new Error(`Token exchange failed: ${tokenData.error?.message || "Unknown error"}`);
 
     const { access_token } = tokenData;
 
-    // Step 2: Get Facebook pages
-    const pagesResponse = await fetch(
-      `https://graph.facebook.com/v18.0/me/accounts?access_token=${access_token}`
-    );
-    const pagesData = await pagesResponse.json();
-    console.log('Pages:', pagesData);
+    // Step 2: Get Facebook user info
+    const meData = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name,email,picture&access_token=${access_token}`).then((r) => r.json());
 
-    if (!pagesData.data || pagesData.data.length === 0) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=no_pages', process.env.NEXTAUTH_URL));
+    // Step 3: Get Facebook pages
+    const pagesData = await fetch(`https://graph.facebook.com/v18.0/me/accounts?access_token=${access_token}`).then((r) => r.json());
+
+    let instagramAccountId = null;
+    let pageAccessToken = access_token;
+    let instagramUsername = null;
+
+    if (pagesData.data && pagesData.data.length > 0) {
+      const page = pagesData.data[0];
+      pageAccessToken = page.access_token;
+
+      // Step 4: Get Instagram Business Account
+      const igData = await fetch(`https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account&access_token=${pageAccessToken}`).then((r) => r.json());
+
+      if (igData.instagram_business_account) {
+        instagramAccountId = igData.instagram_business_account.id;
+        const accountData = await fetch(`https://graph.facebook.com/v18.0/${instagramAccountId}?fields=id,username&access_token=${pageAccessToken}`).then((r) => r.json());
+        instagramUsername = accountData.username || null;
+      }
     }
 
-    const page = pagesData.data[0];
-    const pageAccessToken = page.access_token;
+    // Parse state: "login" or "connect:<email>"
+    const decodedState = decodeURIComponent(state);
+    const isLoginFlow = decodedState === "login";
 
-    // Step 3: Get Instagram Business Account
-    const igResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account&access_token=${pageAccessToken}`
-    );
-    const igData = await igResponse.json();
-    console.log('Instagram data:', igData);
+    // Use Facebook email or fallback to facebook ID as email
+    const userEmail = meData.email || `fb_${meData.id}@triggerflow.app`;
+    const userName = meData.name || instagramUsername || "Instagram User";
+    const userImage = meData.picture?.data?.url || null;
 
-    if (!igData.instagram_business_account) {
-      return NextResponse.redirect(new URL('/dashboard/instagram?error=no_business_account', process.env.NEXTAUTH_URL));
-    }
-
-    const instagramAccountId = igData.instagram_business_account.id;
-
-    // Step 4: Get Instagram account details
-    const accountResponse = await fetch(
-      `https://graph.facebook.com/v18.0/${instagramAccountId}?fields=id,username&access_token=${pageAccessToken}`
-    );
-    const accountData = await accountResponse.json();
-    console.log('Account data:', accountData);
-
-    // Step 5: Save to database
-    await connectDB();
-    const userEmail = decodeURIComponent(state);
-    console.log('Saving to DB for user:', userEmail);
-    const updatedUser = await User.findOneAndUpdate(
-      { email: userEmail },
-      {
-        $set: {
-          'instagram.isConnected': true,
-          'instagram.accessToken': pageAccessToken,
-          'instagram.accountId': instagramAccountId,
-          'instagram.username': accountData.username || 'unknown',
-          'instagram.accountType': 'BUSINESS',
-          'instagram.connectedAt': new Date(),
-        }
+    // Upsert user with Instagram data
+    await prisma.user.upsert({
+      where: { email: isLoginFlow ? userEmail : decodedState },
+      update: {
+        ...(instagramAccountId && {
+          instagramConnected: true,
+          instagramAccessToken: pageAccessToken,
+          instagramAccountId,
+          instagramUsername: instagramUsername || "unknown",
+          instagramAccountType: "BUSINESS",
+          instagramConnectedAt: new Date(),
+        }),
       },
-      { new: true }
-    );
-    console.log('Updated user:', updatedUser?.email, 'instagram:', updatedUser?.instagram);
+      create: {
+        email: isLoginFlow ? userEmail : decodedState,
+        name: userName,
+        image: userImage,
+        ...(instagramAccountId && {
+          instagramConnected: true,
+          instagramAccessToken: pageAccessToken,
+          instagramAccountId,
+          instagramUsername: instagramUsername || "unknown",
+          instagramAccountType: "BUSINESS",
+          instagramConnectedAt: new Date(),
+        }),
+      },
+    });
 
-    return NextResponse.redirect(new URL('/dashboard/instagram?success=connected', 'http://localhost:3000'));
+    if (isLoginFlow) {
+      // Redirect to a special route that signs the user in via NextAuth credentials
+      const params = new URLSearchParams({
+        email: userEmail,
+        name: userName,
+        image: userImage || "",
+      });
+      return NextResponse.redirect(new URL(`/api/auth/instagram/signin?${params}`, baseUrl));
+    }
 
+    return NextResponse.redirect(new URL("/dashboard/instagram?success=connected", baseUrl));
   } catch (error: any) {
     console.error("Instagram OAuth callback error:", error);
-    return NextResponse.redirect(new URL(`/dashboard/instagram?error=${encodeURIComponent(error.message)}`, 'http://localhost:3000'));
+    return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(error.message)}`, process.env.NEXTAUTH_URL || "http://localhost:3000"));
   }
 }

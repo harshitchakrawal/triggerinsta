@@ -1,7 +1,6 @@
 "use client";
 
 import { useDark } from "@/app/lib/useDark";
-import Aurora from "@/app/components/Aurora";
 
 export default function HeroPage() {
   const { dark, mounted } = useDark();
@@ -15,22 +14,6 @@ export default function HeroPage() {
           className="fixed inset-0 z-0 pointer-events-none"
           style={{ animation: "fadeIn 0.6s ease forwards" }}
         >
-          <Aurora
-            speed={0.6}
-            scale={1.5}
-            brightness={1}
-            color1="#f7f7f7"
-            color2="#e100ff"
-            noiseFrequency={2.5}
-            noiseAmplitude={1}
-            bandHeight={0.5}
-            bandSpread={1}
-            octaveDecay={0.1}
-            layerOffset={0}
-            colorSpeed={1}
-            enableMouseInteraction
-            mouseInfluence={0.25}
-          />
         </div>
       )}
 

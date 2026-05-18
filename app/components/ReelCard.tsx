@@ -1,6 +1,7 @@
 'use client';
 
 import { useDark } from "@/app/lib/useDark";
+import { backendUrl } from "@/app/lib/backend";
 
 export const ReelCard = ({
   title,
@@ -21,9 +22,9 @@ export const ReelCard = ({
   
   // Prefer fresh fetch via mediaId, fallback to stored thumbnailUrl
   const imgSrc = mediaId
-    ? `/api/proxy-image?mediaId=${encodeURIComponent(mediaId)}`
+    ? backendUrl(`/proxy-image?mediaId=${encodeURIComponent(mediaId)}`)
     : thumbnailUrl
-    ? `/api/proxy-image?url=${encodeURIComponent(thumbnailUrl)}`
+    ? backendUrl(`/proxy-image?url=${encodeURIComponent(thumbnailUrl)}`)
     : null;
 
   return (

@@ -3,18 +3,41 @@ import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+    </svg>
+  );
+}
+
 export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    // Email/password auth not implemented yet
+    setLoading(false);
+  };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     await signIn("google", { callbackUrl: "/dashboard" });
   };
 
+  const handleInstagramSignIn = async () => {
+    const res = await fetch("/api/auth/instagram/url?flow=login");
+    const { url } = await res.json();
+    window.location.href = url;
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F1EB] flex">
-
-      {/* Grain overlay */}
       <div
         className="pointer-events-none fixed inset-0 z-[1000] opacity-[0.04]"
         style={{
@@ -23,46 +46,32 @@ export default function LoginPage() {
         }}
       />
 
-      {/* Left panel — branding */}
+      {/* Left panel */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 bg-[#0F0F0F] relative overflow-hidden">
-
-        {/* Subtle grid */}
         <div className="absolute inset-0 opacity-[0.04]"
           style={{
             backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
             backgroundSize: "40px 40px",
           }}
         />
-
-        {/* Logo */}
         <Link href="/" className="relative z-10 text-xl font-normal text-white [font-family:'Instrument_Serif',serif]">
           triggerflow
         </Link>
-
-        {/* Center quote */}
         <div className="relative z-10">
           <p className="text-[2.2rem] font-normal leading-[1.2] text-white [font-family:'Instrument_Serif',serif] mb-6">
             "Comment a keyword.<br />
             <em className="italic text-white/50">Get it in your DMs."</em>
           </p>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">
-              HC
-            </div>
+            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">HC</div>
             <div>
               <p className="text-sm font-medium text-white">triggerflow123</p>
               <p className="text-xs text-white/40">Instagram creator</p>
             </div>
           </div>
         </div>
-
-        {/* Stats row */}
         <div className="relative z-10 flex items-center gap-8 border-t border-white/[0.08] pt-8">
-          {[
-            { value: "50K+", label: "Creators" },
-            { value: "10M+", label: "DMs sent" },
-            { value: "0.3s", label: "Response" },
-          ].map((s) => (
+          {[{ value: "50K+", label: "Creators" }, { value: "10M+", label: "DMs sent" }, { value: "0.3s", label: "Response" }].map((s) => (
             <div key={s.label}>
               <p className="text-xl font-normal text-white [font-family:'Instrument_Serif',serif]">{s.value}</p>
               <p className="text-[10px] text-white/40 uppercase tracking-widest mt-0.5">{s.label}</p>
@@ -71,22 +80,85 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right panel — form */}
+      {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
-
-        {/* Mobile logo */}
         <Link href="/" className="lg:hidden text-xl font-normal text-[#0F0F0F] [font-family:'Instrument_Serif',serif] mb-10">
           triggerflow
         </Link>
 
         <div className="w-full max-w-sm">
-
-          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-normal text-[#0F0F0F] [font-family:'Instrument_Serif',serif] mb-1">
-              Welcome back.
-            </h1>
+            <h1 className="text-3xl font-normal text-[#0F0F0F] [font-family:'Instrument_Serif',serif] mb-1">Welcome back.</h1>
             <p className="text-sm text-[#6B6660]">Sign in to your TriggerFlow account.</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6660]">Email</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="bg-white/60 border border-[#0F0F0F]/[0.1] rounded-xl px-4 py-3 text-sm font-medium text-[#0F0F0F] focus:outline-none focus:border-[#0F0F0F]/30 transition-all placeholder:text-[#6B6660]/40 backdrop-blur-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-[#6B6660]">Password</label>
+                <a href="#" className="text-[10px] text-[#6B6660] hover:text-[#0F0F0F] transition-colors">Forgot password?</a>
+              </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full bg-white/60 border border-[#0F0F0F]/[0.1] rounded-xl px-4 py-3 text-sm font-medium text-[#0F0F0F] focus:outline-none focus:border-[#0F0F0F]/30 transition-all placeholder:text-[#6B6660]/40 backdrop-blur-sm pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6660] hover:text-[#0F0F0F] transition-colors"
+                >
+                  {showPassword ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-[#0F0F0F] text-white font-medium text-sm py-3.5 rounded-full hover:opacity-85 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0 flex items-center justify-center gap-2 mt-1"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : "Sign in"}
+            </button>
+
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-[#0F0F0F]/[0.08]" />
+            <span className="text-[10px] text-[#6B6660] uppercase tracking-widest">or</span>
+            <div className="flex-1 h-px bg-[#0F0F0F]/[0.08]" />
           </div>
 
           {/* Google SSO */}
@@ -109,20 +181,14 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          {/* Sign up link */}
           <p className="text-center text-xs text-[#6B6660] mt-6">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-[#0F0F0F] font-medium hover:underline">
-              Sign up free
-            </Link>
+            <Link href="/signup" className="text-[#0F0F0F] font-medium hover:underline">Sign up free</Link>
           </p>
-
         </div>
       </div>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-      `}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');`}</style>
     </div>
   );
 }

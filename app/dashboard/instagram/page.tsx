@@ -4,6 +4,7 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useDark } from "@/app/lib/useDark";
+import { backendUrl } from "@/app/lib/backend";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid } from "@heroicons/react/24/solid";
 
@@ -61,7 +62,7 @@ function MyInstagramPageContent() {
   React.useEffect(() => {
     async function checkStatus() {
       try {
-        const res = await fetch('/api/instagram/status');
+        const res = await fetch(backendUrl("/instagram/status"));
         const data = await res.json();
         setIsConnected(data.isConnected);
         if (data.isConnected) {
@@ -81,8 +82,8 @@ function MyInstagramPageContent() {
     setMediaLoading(true);
     try {
       const [mediaRes, rulesRes] = await Promise.all([
-        fetch('/api/instagram/media'),
-        fetch('/api/rules')
+        fetch(backendUrl("/instagram/media")),
+        fetch(backendUrl("/rules"))
       ]);
       const mediaData = await mediaRes.json();
       const rulesData = await rulesRes.json();
@@ -96,13 +97,13 @@ function MyInstagramPageContent() {
   }
 
   const handleConnect = () => {
-    window.location.href = '/api/auth/instagram';
+    window.location.href = backendUrl("/auth/instagram");
   };
 
   const handleToggleRule = async (ruleId: string) => {
     setTogglingId(ruleId);
     try {
-      const res = await fetch('/api/rules', {
+      const res = await fetch(backendUrl("/rules"), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: ruleId })
@@ -121,7 +122,7 @@ function MyInstagramPageContent() {
   const handleDisconnect = async () => {
     setDisconnecting(true);
     try {
-      const res = await fetch('/api/instagram/disconnect', { method: 'POST' });
+      const res = await fetch(backendUrl("/instagram/disconnect"), { method: 'POST' });
       if (res.ok) {
         setIsConnected(false);
         setAccount(null);
