@@ -4,7 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
-import { useDark } from "@/app/lib/useDark";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { toggleTheme, initTheme } from "@/app/store/slices/themeSlice";
 
 const navLinks = [
   { label: "Home", href: "/", section: "" },
@@ -17,21 +18,13 @@ const Navbar = () => {
   const { data: session, status } = useSession();
   const isLoggedIn = status === "authenticated";
   const isLoading = status === "loading";
-  const { dark } = useDark();
+  const dispatch = useAppDispatch();
+  const dark = useAppSelector(state => state.theme.dark);
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("");
   const [scrolled, setScrolled] = React.useState(false);
 
-  const toggleTheme = () => {
-    const next = !dark;
-    if (next) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
+  React.useEffect(() => { dispatch(initTheme()) }, [dispatch]);
 
   const t = (light: string, d: string) => (dark ? d : light);
 
@@ -120,7 +113,7 @@ const Navbar = () => {
 
             {/* Theme toggle */}
             <button
-              onClick={toggleTheme}
+              onClick={() => dispatch(toggleTheme())}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${t(
                 "text-[#6B6660] hover:text-[#0F0F0F] hover:bg-[#0F0F0F]/[0.06]",
                 "text-white/40 hover:text-white hover:bg-white/[0.08]"

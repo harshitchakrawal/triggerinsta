@@ -3,7 +3,8 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useDark } from "@/app/lib/useDark";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { fetchInstagramStatus, fetchInstagramMedia, setDisconnected } from "@/app/store/slices/instagramSlice";
 import { backendUrl } from "@/app/lib/backend";
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { ChatBubbleOvalLeftIcon as ChatBubbleOvalLeftIconSolid } from "@heroicons/react/24/solid";
@@ -28,23 +29,13 @@ interface AutomationRule {
   triggers: number;
 }
 
-interface AccountInfo {
-  id: string;
-  username: string;
-  accountType: string;
-  connectedAt?: string;
-}
-
 function MyInstagramPageContent() {
-  const { dark } = useDark();
+  const dispatch = useAppDispatch();
+  const dark = useAppSelector(state => state.theme.dark);
+  const { isConnected, account, media, loading, mediaLoading } = useAppSelector(state => state.instagram);
   const searchParams = useSearchParams();
 
-  const [isConnected, setIsConnected] = React.useState(false);
-  const [account, setAccount] = React.useState<AccountInfo | null>(null);
-  const [media, setMedia] = React.useState<InstagramMedia[]>([]);
   const [rules, setRules] = React.useState<AutomationRule[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [mediaLoading, setMediaLoading] = React.useState(false);
   const [disconnecting, setDisconnecting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
@@ -60,41 +51,15 @@ function MyInstagramPageContent() {
 
   // Check connection status on mount
   React.useEffect(() => {
-    async function checkStatus() {
-      try {
-        const res = await fetch(backendUrl("/instagram/status"));
-        const data = await res.json();
-        setIsConnected(data.isConnected);
-        if (data.isConnected) {
-          setAccount(data.account);
-          fetchMedia();
-        }
-      } catch (err) {
-        console.error('Error checking Instagram status:', err);
-      } finally {
-        setLoading(false);
+    dispatch(fetchInstagramStatus()).then((result: any) => {
+      if (result.payload?.isConnected) {
+        dispatch(fetchInstagramMedia());
+        fetch(backendUrl("/rules")).then(r => r.json()).then(data => {
+          if (data.rules) setRules(data.rules);
+        });
       }
-    }
-    checkStatus();
-  }, []);
-
-  async function fetchMedia() {
-    setMediaLoading(true);
-    try {
-      const [mediaRes, rulesRes] = await Promise.all([
-        fetch(backendUrl("/instagram/media")),
-        fetch(backendUrl("/rules"))
-      ]);
-      const mediaData = await mediaRes.json();
-      const rulesData = await rulesRes.json();
-      if (mediaData.success) setMedia(mediaData.media || []);
-      if (rulesData.rules) setRules(rulesData.rules);
-    } catch (err) {
-      console.error('Error fetching media:', err);
-    } finally {
-      setMediaLoading(false);
-    }
-  }
+    });
+  }, [dispatch]);
 
   const handleConnect = () => {
     window.location.href = backendUrl("/auth/instagram");
@@ -123,11 +88,7 @@ function MyInstagramPageContent() {
     setDisconnecting(true);
     try {
       const res = await fetch(backendUrl("/instagram/disconnect"), { method: 'POST' });
-      if (res.ok) {
-        setIsConnected(false);
-        setAccount(null);
-        setMedia([]);
-      }
+      if (res.ok) dispatch(setDisconnected());
     } catch (err) {
       console.error('Error disconnecting:', err);
     } finally {
