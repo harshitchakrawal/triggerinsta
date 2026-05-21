@@ -32,9 +32,9 @@ function Toggle({ enabled, onChange }: { enabled: boolean; onChange: () => void 
 }
 
 export default function SettingsPage() {
-  const [name, setName] = useState("triggerflow123");
+  const [name, setName] = useState("TriggerInsta123");
   const [email, setEmail] = useState("user@example.com");
-  const [igHandle, setIgHandle] = useState("@triggerflow123");
+  const [igHandle, setIgHandle] = useState("@TriggerInsta123");
   const [notifyEmail, setNotifyEmail] = useState(true);
   const [notifyTrigger, setNotifyTrigger] = useState(false);
   const [notifyWeekly, setNotifyWeekly] = useState(true);
@@ -76,7 +76,7 @@ export default function SettingsPage() {
 
           {/* Instagram */}
           <Section title="Instagram account" desc="The connected Instagram account used for automations.">
-            <Field label="Instagram handle" hint="This is the account TriggerFlow monitors for comments.">
+            <Field label="Instagram handle" hint="This is the account TriggerInsta monitors for comments.">
               <input
                 className="bg-transparent border-b border-[#0F0F0F]/[0.1] py-2.5 text-sm font-medium text-[#0F0F0F] focus:outline-none focus:border-[#0F0F0F]/30 transition-all placeholder:text-[#6B6660]/40"
                 value={igHandle} onChange={(e) => setIgHandle(e.target.value)}
@@ -87,7 +87,7 @@ export default function SettingsPage() {
                 <div className="w-2 h-2 rounded-full bg-green-500" />
                 <div>
                   <p className="text-sm font-medium text-[#0F0F0F]">Connected</p>
-                  <p className="text-[10px] text-[#6B6660]">triggerflow123 · Instagram Business</p>
+                  <p className="text-[10px] text-[#6B6660]">TriggerInsta123 · Instagram Business</p>
                 </div>
               </div>
               <button className="text-xs font-medium text-red-500 hover:text-red-600 transition-colors">Disconnect</button>

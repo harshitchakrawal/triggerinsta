@@ -4,16 +4,16 @@ import { useDark } from "@/app/lib/useDark";
 
 const FAQS = [
   {
-    q: "What is TriggerFlow and how does it work?",
-    a: "TriggerFlow is an Instagram comment automation tool. You connect your Instagram account, set a keyword and a reply message, and whenever someone comments that keyword on your reel or post, TriggerFlow automatically replies to the comment and sends them a DM — all without you lifting a finger.",
+    q: "What is TriggerInsta and how does it work?",
+    a: "TriggerInsta is an Instagram comment automation tool. You connect your Instagram account, set a keyword and a reply message, and whenever someone comments that keyword on your reel or post, TriggerInsta automatically replies to the comment and sends them a DM — all without you lifting a finger.",
   },
   {
     q: "Do I need a Business or Creator Instagram account?",
-    a: "Yes. TriggerFlow uses the Instagram Graph API which requires either a Professional (Business or Creator) Instagram account connected to a Facebook Page. Personal accounts are not supported by Meta's API.",
+    a: "Yes. TriggerInsta uses the Instagram Graph API which requires either a Professional (Business or Creator) Instagram account connected to a Facebook Page. Personal accounts are not supported by Meta's API.",
   },
   {
     q: "Will the same person get multiple DMs if they comment more than once?",
-    a: "No. TriggerFlow has built-in deduplication — once a user has been replied to on a specific post, they won't receive another automated reply or DM for the same post, no matter how many times they comment.",
+    a: "No. TriggerInsta has built-in deduplication — once a user has been replied to on a specific post, they won't receive another automated reply or DM for the same post, no matter how many times they comment.",
   },
   {
     q: "Can I run automations on multiple posts or reels at the same time?",
@@ -21,7 +21,7 @@ const FAQS = [
   },
   {
     q: "Is there a free trial for paid plans?",
-    a: "The Free plan lets you try TriggerFlow with 9 triggers at no cost and no credit card required. Paid plans do not currently include a separate trial period, but you can cancel anytime and won't be charged after cancellation.",
+    a: "The Free plan lets you try TriggerInsta with 9 triggers at no cost and no credit card required. Paid plans do not currently include a separate trial period, but you can cancel anytime and won't be charged after cancellation.",
   },
 ];
 

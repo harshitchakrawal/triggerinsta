@@ -40,7 +40,7 @@ export default function HeroPage() {
             Transform engagement into action with instant replies and automated DMs triggered by keywords. Scale your communication without scaling your effort.
           </p>
           <button className={`mt-[1.8rem] border-none rounded-full px-[1.6rem] py-3 text-[0.88rem] font-medium cursor-pointer inline-flex items-center gap-2 tracking-[0.01em] hover:opacity-85 hover:-translate-y-px transition-all duration-200 ${dark ? "bg-white text-[#0F0F0F]" : "bg-[#0F0F0F] text-white"}`}>
-            Get In Touch <span className="text-base not-italic">↗</span>
+            Get In Touch <span className="text-base not-italic">→</span>
           </button>
         </div>
       </section>
