@@ -39,6 +39,7 @@ export async function POST(req: Request) {
       // Step 1 - find active rule
       const rule = await prisma.automationRule.findFirst({ where: { mediaId, isActive: true } });
       if (!rule) continue;
+      console.log("testing")
 
       // Step 2 - keyword check
       if (!commentText.includes(rule.keyword.toLowerCase())) continue;
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
       const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
 
       // Step 6 - fetch username and save dedup + update stats
+      
       let actualUsername = comment.from?.username || comment.from?.name || "unknown";
 
       try {
