@@ -46,7 +46,7 @@ export default function SignupPage() {
           }}
         />
         <Link href="/" className="relative z-10 text-xl font-normal text-white [font-family:'Instrument_Serif',serif]">
-          triggerflow
+          TriggerInsta
         </Link>
         <div className="relative z-10">
           <p className="text-[2.2rem] font-normal leading-[1.2] text-white [font-family:'Instrument_Serif',serif] mb-6">
@@ -56,7 +56,7 @@ export default function SignupPage() {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold text-white">HC</div>
             <div>
-              <p className="text-sm font-medium text-white">triggerflow123</p>
+              <p className="text-sm font-medium text-white">TriggerInsta123</p>
               <p className="text-xs text-white/40">Instagram creator</p>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function SignupPage() {
       {/* Right panel */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative z-10">
         <Link href="/" className="lg:hidden text-xl font-normal text-[#0F0F0F] [font-family:'Instrument_Serif',serif] mb-10">
-          triggerflow
+          TriggerInsta
         </Link>
 
         <div className="w-full max-w-sm">

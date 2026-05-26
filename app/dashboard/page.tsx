@@ -131,7 +131,7 @@ export default function Dashboard() {
                 }`}>Connected:</p>
                 <p className={`text-sm font-bold leading-none ${
                   dark ? "text-white" : "text-[#0F0F0F]"
-                }`}>triggerflow123</p>
+                }`}>TriggerInsta</p>
               </div>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${
                 dark ? "bg-white/8 text-white" : "bg-[#0F0F0F]/8 text-[#0F0F0F]"

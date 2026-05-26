@@ -17,7 +17,7 @@ const STEPS = [
     num: "01",
     label: "Connect",
     title: "Choose the post that should convert",
-    desc: "Paste a reel, post, or story URL and TriggerFlow prepares the automation around that exact Instagram asset.",
+    desc: "Paste a reel, post, or story URL and TriggerInsta prepares the automation around that exact Instagram asset.",
     detail: "Reels, posts, and stories",
     Icon: LinkIcon,
   },
@@ -33,7 +33,7 @@ const STEPS = [
     num: "03",
     label: "Listen",
     title: "Detect comments in real time",
-    desc: "TriggerFlow watches for matching comments, prevents duplicate sends, and keeps the experience clean.",
+    desc: "TriggerInsta watches for matching comments, prevents duplicate sends, and keeps the experience clean.",
     detail: "Built-in deduplication",
     Icon: BoltIcon,
   },
@@ -162,7 +162,7 @@ export default function Workflow() {
               "text-white/55"
             )}`}
           >
-            Connect a post, define the trigger, and let TriggerFlow turn high-intent comments into instant replies,
+            Connect a post, define the trigger, and let TriggerInsta turn high-intent comments into instant replies,
             DMs, and measurable follow-up.
           </p>
 
