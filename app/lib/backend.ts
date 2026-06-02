@@ -1,5 +1,4 @@
-const BACKEND_API_PREFIX =
-  process.env.NODE_ENV === "production" ? "/api/backend" : "/api";
+const BACKEND_API_PREFIX = "/api";
 
 export function backendUrl(path: string) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
