@@ -24,22 +24,22 @@ export async function POST(req: Request) {
     }
 
     let thumbnailUrl = null;
-    let finalCaption = caption;
 
     try {
       const mediaDetails = await fetchMediaDetails(mediaId);
       thumbnailUrl = mediaDetails.media_type === "VIDEO" ? mediaDetails.thumbnail_url : mediaDetails.media_url;
-      if (!caption) finalCaption = mediaDetails.caption;
-    } catch (err: any) {
+    }
+    catch (err: any) {
       console.error("Instagram fetch failed:", err.message);
     }
 
     const rule = await prisma.automationRule.create({
-      data: { mediaId, reelUrl, thumbnailUrl, caption: finalCaption, keyword, replyToComment, replyToDM: replyToDm },
+      data: { mediaId, reelUrl, thumbnailUrl, caption, keyword, replyToComment, replyToDM: replyToDm },
     });
 
     return NextResponse.json({ success: true, rule });
-  } catch (err: any) {
+  } 
+  catch (err: any) {
     console.error("[POST /api/rules]", err);
     if (err.code === "P2002") {
       return NextResponse.json({ error: "Automation already exists for this mediaId" }, { status: 400 });

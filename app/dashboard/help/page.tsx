@@ -24,7 +24,7 @@ const FAQS = [
   },
   {
     q: "Will the same user get multiple replies?",
-    a: "No. TriggerFlow deduplicates — each user only receives one reply per reel, no matter how many times they comment the keyword.",
+    a: "No. TriggerInsta deduplicates — each user only receives one reply per reel, no matter how many times they comment the keyword.",
   },
   {
     q: "How do I pause an automation?",

@@ -79,7 +79,7 @@ const Navbar = () => {
               dark ? "text-white" : "text-[#0F0F0F]"
             }`}
           >
-            TRIGGERFLOW
+            TriggerInsta
           </Link>
 
           {/* Center nav */}

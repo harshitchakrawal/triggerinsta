@@ -12,16 +12,16 @@ export const {
   trustHost: true,
   cookies: {
     pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
-      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.pkce.code_verifier" : "next-auth.pkce.code_verifier",
+      options: { httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production" },
     },
     state: {
-      name: "next-auth.state",
-      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.state" : "next-auth.state",
+      options: { httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production" },
     },
     sessionToken: {
-      name: "next-auth.session-token",
-      options: { httpOnly: true, sameSite: "none", path: "/", secure: true },
+      name: process.env.NODE_ENV === "production" ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      options: { httpOnly: true, sameSite: "lax", path: "/", secure: process.env.NODE_ENV === "production" },
     },
   },
   providers: [

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/prisma";
 
 function timeAgo(date: Date) {
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
     const filter = searchParams.get("filter") || "all";
     const csv = searchParams.get("csv") === "true";
 
-    const where: any = {};
+    const where: Prisma.ProcessedCommentWhereInput = {};
     if (search) {
       where.OR = [
         { username: { contains: search, mode: "insensitive" } },

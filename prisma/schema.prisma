@@ -42,7 +42,7 @@ model ProcessedComment {
   id          String         @id @default(cuid())
   dedupKey    String         @unique
   ruleId      String
-  rule        AutomationRule @relation(fields: [ruleId], references: [id])
+  rule        AutomationRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
   username    String?        @default("unknown_user")
   commentText String?        @default("")
   createdAt   DateTime       @default(now())

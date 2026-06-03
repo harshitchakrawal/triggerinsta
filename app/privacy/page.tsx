@@ -4,7 +4,7 @@ export default function Privacy() {
       <h1>Privacy Policy</h1>
       <p>Last updated: March 31, 2026</p>
       <h2>Data Collection</h2>
-      <p>Triggerflow collects Instagram comments and sends automated 
+      <p>TriggerInsta collects Instagram comments and sends automated 
       direct messages on behalf of users who authorize the app.</p>
       <h2>Data Usage</h2>
       <p>We only use data to deliver the automation service. 

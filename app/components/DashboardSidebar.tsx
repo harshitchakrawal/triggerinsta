@@ -163,7 +163,7 @@ const DashboardSidebar = () => {
           <span className={`text-xl font-normal tracking-tight leading-none mb-1 [font-family:'Instrument_Serif',serif] ${
             dark ? "text-white" : "text-[#0F0F0F]"
           }`}>
-            triggerflow
+            TriggerInsta
           </span>
           <span className={`text-xs font-medium tracking-wide ${dark ? "text-white/60" : "text-[#6B6660]"}`}>Instagram automation</span>
         </Link>
@@ -204,7 +204,7 @@ const DashboardSidebar = () => {
               dark 
                 ? "text-white group-hover:text-white/60" 
                 : "text-[#0F0F0F] group-hover:text-[#6B6660]"
-            }`}>triggerflow123</span>
+            }`}>TriggerInsta123</span>
             <span className={`text-[10px] font-medium ${dark ? "text-white/60" : "text-[#6B6660]"}`}>Free plan</span>
           </div>
         </div>

@@ -47,7 +47,7 @@ export default function DashboardLayout({
           <div className="flex flex-col">
             <span className={`text-sm font-normal tracking-tight [font-family:'Instrument_Serif',serif] ${
               dark ? "text-white" : "text-[#0F0F0F]"
-            }`}>triggerflow</span>
+            }`}>TriggerInsta</span>
             <span className={`text-[10px] font-medium ${dark ? "text-white/60" : "text-[#6B6660]"}`}>Instagram automation</span>
           </div>
           <button
