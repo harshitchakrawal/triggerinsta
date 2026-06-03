@@ -30,11 +30,17 @@ export async function GET(request: Request) {
 
     const { access_token } = tokenData;
 
-    // Step 2: Get Facebook user info
-    const meData = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name,email,picture&access_token=${access_token}`).then((r) => r.json());
+    // Step 2: Exchange for long-lived user token (page tokens from long-lived tokens never expire)
+    const longLivedRes = await fetch(
+      `https://graph.facebook.com/v18.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${access_token}`
+    ).then((r) => r.json());
+    const longLivedToken = longLivedRes.access_token || access_token;
 
-    // Step 3: Get Facebook pages
-    const pagesData = await fetch(`https://graph.facebook.com/v18.0/me/accounts?access_token=${access_token}`).then((r) => r.json());
+    // Step 3: Get Facebook user info
+    const meData = await fetch(`https://graph.facebook.com/v18.0/me?fields=id,name,email,picture&access_token=${longLivedToken}`).then((r) => r.json());
+
+    // Step 4: Get Facebook pages (page tokens from long-lived user token are permanent)
+    const pagesData = await fetch(`https://graph.facebook.com/v18.0/me/accounts?access_token=${longLivedToken}`).then((r) => r.json());
 
     let instagramAccountId = null;
     let pageAccessToken = access_token;

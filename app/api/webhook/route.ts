@@ -2,7 +2,6 @@ import axios from "axios";
 import { prisma } from "@/app/lib/prisma";
 
 const VERIFY_TOKEN = "triggerflow123";
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN!;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -39,7 +38,15 @@ export async function POST(req: Request) {
       // Step 1 - find active rule
       const rule = await prisma.automationRule.findFirst({ where: { mediaId, isActive: true } });
       if (!rule) continue;
-      console.log("testing")
+
+      // Get access token from connected user
+      const connectedUser = await prisma.user.findFirst({
+        where: { instagramConnected: true },
+        select: { instagramAccessToken: true, instagramAccountId: true },
+      });
+      if (!connectedUser?.instagramAccessToken) continue;
+      const PAGE_ACCESS_TOKEN = connectedUser.instagramAccessToken;
+      const PAGE_ID = connectedUser.instagramAccountId;
 
       // Step 2 - keyword check
       if (!commentText.includes(rule.keyword.toLowerCase())) continue;
@@ -50,10 +57,10 @@ export async function POST(req: Request) {
       if (already) continue;
 
       // Step 4 - send comment reply
-      const commentSuccess = await replyToComment(commentId, rule.replyToComment);
+      const commentSuccess = await replyToComment(commentId, rule.replyToComment, PAGE_ACCESS_TOKEN);
 
       // Step 5 - send DM
-      const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM);
+      const dmSuccess = await sendInstagramDM(commenterId, rule.replyToDM, PAGE_ACCESS_TOKEN, PAGE_ID!);
 
       // Step 6 - fetch username and save dedup + update stats
       
@@ -99,12 +106,12 @@ export async function POST(req: Request) {
   return new Response("EVENT_RECEIVED", { status: 200 });
 }
 
-async function replyToComment(commentId: string, message: string): Promise<boolean> {
+async function replyToComment(commentId: string, message: string, token: string): Promise<boolean> {
   try {
     await axios.post(
       `https://graph.facebook.com/v19.0/${commentId}/replies`,
       { message },
-      { params: { access_token: PAGE_ACCESS_TOKEN } }
+      { params: { access_token: token } }
     );
     return true;
   } catch (err: any) {
@@ -113,12 +120,12 @@ async function replyToComment(commentId: string, message: string): Promise<boole
   }
 }
 
-async function sendInstagramDM(userId: string, message: string): Promise<boolean> {
+async function sendInstagramDM(userId: string, message: string, token: string, pageId: string): Promise<boolean> {
   try {
     await axios.post(
-      `https://graph.facebook.com/v19.0/${process.env.PAGE_ID}/messages`,
+      `https://graph.facebook.com/v19.0/${pageId}/messages`,
       { recipient: { id: userId }, message: { text: message }, messaging_type: "RESPONSE" },
-      { params: { access_token: PAGE_ACCESS_TOKEN } }
+      { params: { access_token: token } }
     );
     return true;
   } catch (err: any) {
