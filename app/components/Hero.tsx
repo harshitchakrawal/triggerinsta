@@ -39,9 +39,14 @@ export default function HeroPage() {
           <p className={`mt-[1.1rem] text-[0.92rem] max-w-[460px] mx-auto leading-[1.7] font-normal ${dark ? "text-white/60" : "text-[#6B6660]"}`}>
             Transform engagement into action with instant replies and automated DMs triggered by keywords. Scale your communication without scaling your effort.
           </p>
-          <button className={`mt-[1.8rem] border-none rounded-full px-[1.6rem] py-3 text-[0.88rem] font-medium cursor-pointer inline-flex items-center gap-2 tracking-[0.01em] hover:opacity-85 hover:-translate-y-px transition-all duration-200 ${dark ? "bg-white text-[#0F0F0F]" : "bg-[#0F0F0F] text-white"}`}>
-            Get In Touch <span className="text-base not-italic">→</span>
-          </button>
+          <div className="flex items-center justify-center gap-3 mt-[1.8rem]">
+            <a href="/dashboard" className={`border-none rounded-full px-[1.6rem] py-3 text-[0.88rem] font-medium cursor-pointer inline-flex items-center gap-2 tracking-[0.01em] hover:opacity-85 hover:-translate-y-px transition-all duration-200 ${dark ? "bg-white text-[#0F0F0F]" : "bg-[#0F0F0F] text-white"}`}>
+              Go to Dashboard <span className="text-base not-italic">→</span>
+            </a>
+            <button className={`border rounded-full px-[1.6rem] py-3 text-[0.88rem] font-medium cursor-pointer inline-flex items-center gap-2 tracking-[0.01em] hover:opacity-85 hover:-translate-y-px transition-all duration-200 ${dark ? "border-white/20 text-white/80 hover:bg-white/5" : "border-[#0F0F0F]/10 text-[#0F0F0F]/80 hover:bg-[#0F0F0F]/5"}`}>
+              Get In Touch
+            </button>
+          </div>
         </div>
       </section>
 
