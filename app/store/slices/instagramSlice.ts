@@ -16,13 +16,25 @@ export const fetchInstagramMedia = createAsyncThunk(
   }
 )
 
+interface InstagramMedia {
+  id: string;
+  media_type: string;
+  media_url: string;
+  thumbnail_url?: string;
+  permalink: string;
+  caption?: string;
+  timestamp: string;
+  like_count?: number;
+  comments_count?: number;
+}
+
 const instagramSlice = createSlice({
   name: 'instagram',
   initialState: {
     isConnected: false,
     account: null as any,
-    media: [],
-    rules: [],
+    media: [] as InstagramMedia[],
+    rules: [] as any[],
     loading: false,
     mediaLoading: false,
   },

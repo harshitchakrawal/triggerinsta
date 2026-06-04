@@ -51,7 +51,7 @@ BEFORE generating any output, silently complete this analysis:
 - What's conspicuously MISSING from recent posts that the audience likely wants?
 
 RECENT TOP POSTS:
-${topPosts.map((p, i) => `${i + 1}. ${p.type} - "${p.caption.slice(0, 150)}" (${p.likes} likes, ${p.comments} comments)`).join("\n")}
+${topPosts.map((p: { type: string; caption: string; likes: number; comments: number }, i: number) => `${i + 1}. ${p.type} - "${p.caption.slice(0, 150)}" (${p.likes} likes, ${p.comments} comments)`).join("\n")}
 
 TOP PERFORMING AUTOMATIONS:
 ${topAutomations.length > 0 ? topAutomations.map((a, i) => `${i + 1}. Keyword: "${a.keyword}" - ${a.triggers} triggers, ${a.successRate}% success rate`).join("\n") : "No automations yet"}
@@ -96,11 +96,11 @@ STRATEGY: [3 sentences. Sentence 1: what data pattern this post exploits. Senten
     const aiResponse = groqData.choices[0]?.message?.content || "";
 
     // Parse AI response
-    const topicMatch = aiResponse.match(/TOPIC:\s*(.+?)(?=\n|WHY:)/s);
-    const whyMatch = aiResponse.match(/WHY:\s*(.+?)(?=\n|CAPTION:)/s);
-    const captionMatch = aiResponse.match(/CAPTION:\s*(.+?)(?=\n|KEYWORD:)/s);
-    const keywordMatch = aiResponse.match(/KEYWORD:\s*(.+?)(?=\n|STRATEGY:)/s);
-    const strategyMatch = aiResponse.match(/STRATEGY:\s*(.+?)$/s);
+    const topicMatch = aiResponse.match(/TOPIC:\s*([\s\S]+?)(?=WHY:)/);
+    const whyMatch = aiResponse.match(/WHY:\s*([\s\S]+?)(?=CAPTION:)/);
+    const captionMatch = aiResponse.match(/CAPTION:\s*([\s\S]+?)(?=KEYWORD:)/);
+    const keywordMatch = aiResponse.match(/KEYWORD:\s*([\s\S]+?)(?=STRATEGY:)/);
+    const strategyMatch = aiResponse.match(/STRATEGY:\s*([\s\S]+?)$/);
 
     return NextResponse.json({
       success: true,
