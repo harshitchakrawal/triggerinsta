@@ -94,7 +94,7 @@ export default function SignupPage() {
               {igLoading ? (
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                <><InstagramIcon />Continue with Instagram</>
+                <><InstagramIcon />Continue with Instagram Business</>
               )}
             </button>
 
@@ -116,6 +116,12 @@ export default function SignupPage() {
               )}
               Continue with Google
             </button>
+          </div>
+
+          <div className="mt-4 p-3 rounded-lg bg-blue-50 border border-blue-100">
+            <p className="text-[10px] text-blue-900 leading-relaxed">
+              <strong>Note:</strong> Instagram Business accounts require a Facebook Page connection. You'll be asked to log in with Facebook to authorize your Instagram Business account.
+            </p>
           </div>
 
           <p className="text-center text-xs text-[#6B6660] mt-6">
