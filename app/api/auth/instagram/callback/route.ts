@@ -48,7 +48,12 @@ export async function GET(request: Request) {
 
     if (pagesData.data && pagesData.data.length > 0) {
       const page = pagesData.data[0];
-      pageAccessToken = page.access_token;
+
+      // Fetch page token using long-lived user token so the page token is permanent
+      const pageTokenRes = await fetch(
+        `https://graph.facebook.com/v18.0/${page.id}?fields=access_token&access_token=${longLivedToken}`
+      ).then((r) => r.json());
+      pageAccessToken = pageTokenRes.access_token || page.access_token;
 
       // Step 4: Get Instagram Business Account
       const igData = await fetch(`https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account&access_token=${pageAccessToken}`).then((r) => r.json());
