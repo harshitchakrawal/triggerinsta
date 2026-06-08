@@ -2,59 +2,112 @@
 
 An Instagram comment automation tool. When someone comments a keyword on your reel, it automatically replies to their comment and sends them a DM.
 
+This is a **monorepo** split into two services:
+
+```
+triggerflow/
+├── frontend/   # Next.js 16 (App Router) — UI + NextAuth + a thin proxy to the backend
+└── backend/    # Django 5 + DRF — all business logic, Meta Graph API, the webhook engine
+```
+
+## Architecture
+
+```
+Browser
+  │  (NextAuth session cookie)
+  ▼
+frontend/  Next.js — keeps NextAuth (Google + Instagram OAuth) and the UI.
+  │  Proxy at app/api/backend/[...path] runs auth(), injects:
+  │    X-Internal-Secret  (shared secret, proves the call is from the frontend)
+  │    X-User-Email        (the authenticated user's identity)
+  ▼
+backend/   Django + DRF — all data/Meta/Groq logic.
+  ▼
+Neon Postgres — the SAME database, schema owned by Prisma (frontend/prisma).
+                Django reads/writes it via introspected `managed=False` models.
+        ▲
+Meta webhook ──────────────► backend  /api/webhook   (Meta calls Django directly)
+```
+
+The frontend never talks to the database. NextAuth callbacks and the Instagram
+OAuth handshake delegate persistence to internal Django endpoints
+(`/api/internal/users/upsert`, `/api/instagram/oauth/exchange`).
+
 ## Tech Stack
 
-- **Next.js 15** (App Router) + TypeScript
-- **PostgreSQL** via [Neon](https://neon.tech) (serverless)
-- **Prisma 7** ORM with `@prisma/adapter-neon`
-- **NextAuth v5** — Google OAuth
-- **Meta Graph API** — Instagram webhooks, comment replies, DMs
-- **Tailwind CSS**
-- **ngrok** — for exposing localhost to Meta webhooks
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind v4, NextAuth v5, Redux Toolkit
+- **Backend:** Django 5, Django REST Framework, `psycopg` (Postgres), `requests`
+- **Database:** PostgreSQL via [Neon](https://neon.tech); schema managed by **Prisma 7** (source of truth), read by Django as `managed=False` models
+- **Meta Graph API:** Instagram webhooks, comment replies, DMs
+- **Groq:** `llama-3.3-70b-versatile` for AI content suggestions
+- **ngrok:** to expose localhost to Meta webhooks
 
 ---
 
 ## Prerequisites
 
-Make sure you have these installed:
-- Node.js 18+
-- npm
+- Node.js 18+ and npm
+- Python 3.11+ and `venv`
 - ngrok (`brew install ngrok` on macOS)
 
 ---
 
-## 1. Clone & Install
+## 1. Backend (Django) — `backend/`
 
 ```bash
-git clone <repo-url>
-cd triggerflow
-npm install
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
+
+Create `backend/.env` (ask a team member for secret values):
+
+```env
+DATABASE_URL=postgresql://<user>:<password>@<host>/neondb?sslmode=require
+
+# Meta / Instagram Graph API
+PAGE_ACCESS_TOKEN=
+INSTAGRAM_ACCOUNT_ID=
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=
+INSTAGRAM_REDIRECT_URI=https://<your-ngrok-domain>/api/auth/instagram/callback
+VERIFY_TOKEN=triggerflow123
+GRAPH_API_VERSION=v19.0
+
+# Groq
+GROQ_API_KEY=
+
+# Must match the frontend value
+INTERNAL_API_SECRET=<shared secret>
+
+# Django
+DJANGO_SECRET_KEY=<random>
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+Run it (port 8000):
+
+```bash
+python manage.py runserver 8000
+```
+
+> Django uses `managed=False` models over the existing Prisma tables — it never
+> migrates or alters the schema. There is nothing to migrate on the backend.
 
 ---
 
-## 2. Set up Environment Variables
+## 2. Frontend (Next.js) — `frontend/`
 
-Create a `.env.local` file in the root of the project:
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env.local`:
 
 ```env
-# PostgreSQL (Neon)
-DATABASE_URL=postgresql://<user>:<password>@<host>/neondb?sslmode=require
-
-# Meta / Instagram
-PAGE_ACCESS_TOKEN=
-PAGE_ID=
-INSTAGRAM_ACCOUNT_ID=
-VERIFY_TOKEN=triggerflow123
-INSTAGRAM_ACCESS_TOKEN=
-
-# Facebook App Credentials
-FACEBOOK_APP_ID=
-FACEBOOK_APP_SECRET=
-INSTAGRAM_APP_ID=
-INSTAGRAM_APP_SECRET=
-INSTAGRAM_REDIRECT_URI=https://<your-ngrok-domain>/api/auth/instagram/callback
-
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
@@ -63,110 +116,75 @@ AUTH_TRUST_HOST=true
 # Google OAuth
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+
+# Facebook/Instagram OAuth (used by the OAuth URL builder routes)
+FACEBOOK_APP_ID=
+INSTAGRAM_REDIRECT_URI=https://<your-ngrok-domain>/api/auth/instagram/callback
+
+# Django backend connection
+BACKEND_URL=http://localhost:8000
+INTERNAL_API_SECRET=<same shared secret as backend>
 ```
 
-> Ask a team member for the actual values — never commit this file.
-
----
-
-## 3. Set up the Database
-
-We use [Neon](https://neon.tech) for PostgreSQL. Ask a team member for the `DATABASE_URL` connection string and add it to `.env.local`.
-
-Then run Prisma migrations to create all tables:
-
-```bash
-npx prisma migrate dev
-```
-
-To view the database in a GUI:
-
-```bash
-npx prisma studio
-```
-
----
-
-## 4. Run the Dev Server
+Run it (port 3000):
 
 ```bash
 npm run dev
 ```
 
-App runs at [http://localhost:3000](http://localhost:3000)
+App runs at [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## 5. Run ngrok (for Instagram Webhooks)
+## 3. Database (Prisma — schema source of truth)
 
-Meta requires a public HTTPS URL to send webhook events. We use ngrok with a fixed domain.
+The database lives in `frontend/prisma`. Schema changes still go through Prisma:
 
 ```bash
-ngrok http --domain=<your-ngrok-domain> 3000
+cd frontend
+npx prisma migrate dev     # apply/create migrations
+npx prisma studio          # GUI
 ```
 
-> The ngrok domain is set in `INSTAGRAM_REDIRECT_URI` in `.env.local`. Ask a team member for the domain.
-
-The webhook endpoint Meta calls is:
-```
-https://<your-ngrok-domain>/api/webhook
-```
+After a schema change, update the Django models in `backend/core/models.py`
+(re-run `python manage.py inspectdb` for guidance) so they stay in sync.
 
 ---
 
-## Project Structure
+## 4. ngrok (for Instagram webhooks)
 
-```
-app/
-├── api/
-│   ├── auth/           # NextAuth + Instagram OAuth callback
-│   ├── webhook/        # Instagram comment webhook handler
-│   ├── rules/          # CRUD for automation rules
-│   ├── dashboard/      # Dashboard stats API
-│   ├── analytics/      # Analytics API
-│   ├── activity/       # Activity log API
-│   └── instagram/      # Instagram status, media, disconnect
-├── dashboard/          # All dashboard pages (UI)
-├── components/         # Shared UI components
-├── lib/
-│   ├── prisma.ts       # Prisma client singleton
-│   ├── auth.ts         # NextAuth config
-│   └── mongodb.ts      # (deprecated, no longer used)
-├── models/             # (deprecated Mongoose models, no longer used)
-└── prisma/
-    └── schema.prisma   # Database schema
-```
+Meta needs a public HTTPS URL.
+
+- **Webhook events** are sent by Meta directly to the **backend**:
+  ```bash
+  ngrok http --domain=<your-ngrok-domain> 8000
+  # Meta webhook URL: https://<your-ngrok-domain>/api/webhook
+  ```
+- **The OAuth redirect** (`INSTAGRAM_REDIRECT_URI`) points at the **frontend**
+  `:3000` `/api/auth/instagram/callback`. In development, expose both ports
+  (two tunnels) or proxy the webhook through the frontend if you only have one.
 
 ---
 
 ## How It Works
 
-1. User logs in with Google
-2. User connects their Instagram Business account via Meta OAuth
-3. User creates an automation rule — pastes a reel URL, sets a keyword, writes reply messages
-4. When someone comments the keyword on that reel, Meta sends a webhook event to `/api/webhook`
-5. The webhook handler:
-   - Finds the matching automation rule
-   - Checks for duplicate (same user + reel)
-   - Replies publicly to the comment
-   - Sends a DM to the commenter (requires Meta `instagram_manage_messages` approval)
-   - Saves the processed comment and updates stats
-
----
-
-## Common Commands
-
-```bash
-npm run dev           # Start dev server
-npx prisma migrate dev   # Run DB migrations
-npx prisma generate      # Regenerate Prisma client after schema changes
-npx prisma studio        # Open DB GUI
-```
+1. User logs in with Google (or "Login with Instagram").
+2. User connects their Instagram Business account via Meta OAuth — the frontend
+   callback forwards the code to Django (`/api/instagram/oauth/exchange`), which
+   does the Graph API token exchange and stores the long-lived page token.
+3. User creates an automation rule — pastes a reel URL, sets a keyword, writes
+   the comment reply and DM messages.
+4. When someone comments the keyword on that reel, Meta sends a webhook event to
+   the backend `/api/webhook`.
+5. The Django webhook engine: finds the matching rule, dedups (user + reel),
+   replies to the comment, sends a DM, saves the processed comment, updates stats.
 
 ---
 
 ## Notes
 
-- **DM sending** requires Meta app review approval for `instagram_manage_messages` permission. Until approved, only comment replies work.
-- The `VERIFY_TOKEN` in `.env.local` must match what's configured in the Meta Developer Console under webhook settings.
-- If you change `prisma/schema.prisma`, always run `npx prisma migrate dev` and `npx prisma generate`.
+- **DM sending** requires Meta app review for `instagram_manage_messages`. Until
+  approved, only comment replies work.
+- `VERIFY_TOKEN` (backend) must match the Meta Developer Console webhook config.
+- `INTERNAL_API_SECRET` must be identical in `backend/.env` and
+  `frontend/.env.local`; it is never exposed to the browser.
