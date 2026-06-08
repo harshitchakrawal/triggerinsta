@@ -17,7 +17,6 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  console.log("Webhook received:", JSON.stringify(body, null, 2));
 
   if (body.object !== "instagram") {
     return new Response("EVENT_RECEIVED", { status: 200 });

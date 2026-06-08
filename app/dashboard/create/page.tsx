@@ -68,7 +68,7 @@ export default function CreateAutomation() {
     setLoading(true);
     try {
       const body = editing
-        ? { id: editId, mediaId: dbData?.mediaId, reelUrl: dbData?.reelUrl, caption: dbData?.caption, keyword: keywords.join(","), replyToComment, replyToDm }
+        ? { id: editId, reelUrl: dbData?.reelUrl, caption: dbData?.caption, keyword: keywords.join(","), replyToComment, replyToDm }
         : { mediaId, reelUrl, caption, keyword: keywords.join(","), replyToComment, replyToDm };
       const res = await fetch(backendUrl("/rules"), { method: editing ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 3000); if (editing) window.location.href = "/dashboard/automations"; }
